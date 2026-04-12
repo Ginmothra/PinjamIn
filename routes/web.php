@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryManagementController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ManagementPlaceholderController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -23,8 +24,14 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
+    Route::get('/manajemen/kategori', [CategoryManagementController::class, 'index'])->name('categories.index');
+    Route::get('/manajemen/kategori/create', [CategoryManagementController::class, 'create'])->name('categories.create');
+    Route::post('/manajemen/kategori', [CategoryManagementController::class, 'store'])->name('categories.store');
+    Route::get('/manajemen/kategori/{category}/edit', [CategoryManagementController::class, 'edit'])->name('categories.edit');
+    Route::put('/manajemen/kategori/{category}', [CategoryManagementController::class, 'update'])->name('categories.update');
+    Route::delete('/manajemen/kategori/{category}', [CategoryManagementController::class, 'destroy'])->name('categories.destroy');
+
     Route::get('/manajemen/barang', [ManagementPlaceholderController::class, 'item'])->name('items.index');
-    Route::get('/manajemen/kategori', [ManagementPlaceholderController::class, 'category'])->name('categories.index');
     Route::get('/manajemen/peminjaman', [ManagementPlaceholderController::class, 'loan'])->name('loans.index');
     Route::get('/manajemen/pengembalian', [ManagementPlaceholderController::class, 'loanReturn'])->name('returns.index');
     Route::get('/manajemen/log-aktifitas', [ManagementPlaceholderController::class, 'activityLog'])->name('activity-log.index');
