@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	:root {
+		--brand-cyan: #20a7db;
+		--brand-blue: #007dff;
+		--brand-white: #ffffff;
+		color-scheme: light;
+	}
+
+	html {
+		color-scheme: light;
+	}
+
+	body {
+		min-height: 100vh;
+		color: #0f172a;
+		background-color: var(--brand-white);
+		background-image: radial-gradient(circle at 8% -20%, rgba(32, 167, 219, 0.20), transparent 45%),
+			radial-gradient(circle at 92% 120%, rgba(0, 125, 255, 0.16), transparent 45%);
+		background-repeat: no-repeat;
+	}
+}
