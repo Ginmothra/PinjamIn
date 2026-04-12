@@ -20,6 +20,21 @@ test('users can authenticate using the login screen', function () {
     $response->assertRedirect(route('dashboard', absolute: false));
 });
 
+test('pending users can not authenticate using the login screen', function () {
+    $user = User::factory()->create([
+        'status' => 'pending',
+    ]);
+
+    $response = $this->from('/login')->post('/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertGuest();
+    $response->assertRedirect('/login');
+    $response->assertSessionHasErrors('email');
+});
+
 test('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 

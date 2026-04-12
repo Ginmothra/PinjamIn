@@ -1,9 +1,16 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ManagementPlaceholderController;
+use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    if (auth()->user()->hasRole('admin')) {
+        return redirect()->route('admin.dashboard');
+    }
+
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -11,6 +18,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    Route::get('/manajemen/barang', [ManagementPlaceholderController::class, 'item'])->name('items.index');
+    Route::get('/manajemen/kategori', [ManagementPlaceholderController::class, 'category'])->name('categories.index');
+    Route::get('/manajemen/peminjaman', [ManagementPlaceholderController::class, 'loan'])->name('loans.index');
+    Route::get('/manajemen/pengembalian', [ManagementPlaceholderController::class, 'loanReturn'])->name('returns.index');
+    Route::get('/manajemen/log-aktifitas', [ManagementPlaceholderController::class, 'activityLog'])->name('activity-log.index');
+
+    Route::get('/manajemen/users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::get('/manajemen/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
+    Route::put('/manajemen/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
+    Route::patch('/manajemen/users/{user}/approve', [UserManagementController::class, 'approve'])->name('users.approve');
+    Route::patch('/manajemen/users/{user}/reject', [UserManagementController::class, 'reject'])->name('users.reject');
 });
 
 require __DIR__.'/auth.php';
