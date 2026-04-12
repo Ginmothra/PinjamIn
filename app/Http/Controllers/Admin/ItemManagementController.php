@@ -13,18 +13,61 @@ use Illuminate\View\View;
 
 class ItemManagementController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $items = Item::query()
+        $filters = [
+            'q' => trim((string) $request->query('q', '')),
+            'status' => (string) $request->query('status', ''),
+        ];
+
+        $query = Item::query()
             ->with([
                 'loanItems.loan:id,status',
             ])
-            ->latest()
-            ->paginate(15);
+            ->latest();
+
+        if ($filters['q'] !== '') {
+            $search = $filters['q'];
+
+            $query->where(function ($builder) use ($search): void {
+                $builder->where('code', 'like', '%' . $search . '%')
+                    ->orWhere('name', 'like', '%' . $search . '%');
+            });
+        }
+
+        if (in_array($filters['status'], ['aktif', 'dipinjam', 'dikembalikan'], true)) {
+            if ($filters['status'] === 'dipinjam') {
+                $query->whereHas('loanItems.loan', function ($builder): void {
+                    $builder->where('status', 'borrowed');
+                });
+            }
+
+            if ($filters['status'] === 'dikembalikan') {
+                $query->whereDoesntHave('loanItems.loan', function ($builder): void {
+                    $builder->where('status', 'borrowed');
+                })->whereHas('loanItems.loan', function ($builder): void {
+                    $builder->where('status', 'returned');
+                });
+            }
+
+            if ($filters['status'] === 'aktif') {
+                $query->whereDoesntHave('loanItems.loan', function ($builder): void {
+                    $builder->whereIn('status', ['borrowed', 'returned']);
+                });
+            }
+        }
+
+        $items = $query->paginate(15)->withQueryString();
 
         return view('admin.items.index', [
             'items' => $items,
+            'filters' => $filters,
             'itemStatusBadges' => $this->itemStatusBadges(),
+            'itemStatusOptions' => [
+                'aktif' => 'Aktif',
+                'dipinjam' => 'Dipinjam',
+                'dikembalikan' => 'Dikembalikan',
+            ],
         ]);
     }
 

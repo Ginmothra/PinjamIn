@@ -17,6 +17,33 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-4">
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                <form method="GET" action="{{ route('admin.items.index') }}" class="grid gap-3 sm:grid-cols-[1fr_220px_auto_auto] sm:items-end">
+                    <div>
+                        <label for="q" class="text-xs font-semibold uppercase tracking-wide text-slate-500">Cari Barang</label>
+                        <input id="q" name="q" type="text" value="{{ $filters['q'] ?? '' }}" placeholder="Cari kode atau nama barang..." class="mt-1 block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-sky-500 focus:ring-sky-500" />
+                    </div>
+
+                    <div>
+                        <label for="status" class="text-xs font-semibold uppercase tracking-wide text-slate-500">Status</label>
+                        <select id="status" name="status" class="mt-1 block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-sky-500 focus:ring-sky-500">
+                            <option value="">Semua Status</option>
+                            @foreach ($itemStatusOptions as $value => $label)
+                                <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <button type="submit" class="inline-flex items-center justify-center rounded-md bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700">
+                        Terapkan
+                    </button>
+
+                    <a href="{{ route('admin.items.index') }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                        Reset
+                    </a>
+                </form>
+            </div>
+
             <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
