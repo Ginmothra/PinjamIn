@@ -97,6 +97,21 @@ class UserManagementController extends Controller
             ->with('status', 'Data user berhasil diperbarui.');
     }
 
+    public function destroy(Request $request, User $user): RedirectResponse
+    {
+        if ((int) $request->user()->id === (int) $user->id) {
+            return redirect()->route('admin.users.index')
+                ->with('status', 'Anda tidak dapat menghapus akun yang sedang digunakan.');
+        }
+
+        $user->delete();
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        return redirect()->route('admin.users.index')
+            ->with('status', 'User berhasil dihapus.');
+    }
+
     private function roleOptions(): array
     {
         return [

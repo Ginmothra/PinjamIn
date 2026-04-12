@@ -47,7 +47,16 @@
                                         </div>
                                     </td>
                                     <td class="px-5 py-4">
-                                        <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium text-sky-700 transition hover:bg-sky-50 hover:text-sky-900">Edit</a>
+                                        <div class="flex items-center gap-2">
+                                            <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium text-sky-700 transition hover:bg-sky-50 hover:text-sky-900">Edit</a>
+                                            <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="delete-user-form inline-flex" data-user-name="{{ $user->name }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium text-rose-700 transition hover:bg-rose-50 hover:text-rose-900">
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -70,4 +79,31 @@
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.querySelectorAll('.delete-user-form').forEach((form) => {
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+
+                const userName = form.dataset.userName || 'user ini';
+
+                Swal.fire({
+                    title: 'Hapus user?',
+                    text: 'Data ' + userName + ' akan dihapus permanen.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Ya, hapus',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
 </x-app-layout>
