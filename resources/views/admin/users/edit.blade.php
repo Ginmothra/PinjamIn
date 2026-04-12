@@ -27,8 +27,8 @@
                     <div>
                         <x-input-label for="role" value="Role" />
                         <select id="role" name="role" class="mt-1 block w-full rounded-md border-gray-300" required>
-                            @foreach ($roles as $role)
-                                <option value="{{ $role }}" @selected(old('role', $user->roles->first()?->name) === $role)>{{ $role }}</option>
+                            @foreach ($roles as $value => $label)
+                                <option value="{{ $value }}" @selected(old('role', $user->roles->first()?->name) === $value)>{{ $label }}</option>
                             @endforeach
                         </select>
                         <x-input-error class="mt-2" :messages="$errors->get('role')" />

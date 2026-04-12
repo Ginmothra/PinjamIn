@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 class UserManagementController extends Controller
@@ -24,13 +23,14 @@ class UserManagementController extends Controller
 
         return view('admin.users.index', [
             'users' => $users,
+            'roleBadges' => $this->roleBadges(),
         ]);
     }
 
     public function create(): View
     {
         return view('admin.users.create', [
-            'roles' => Role::query()->orderBy('name')->pluck('name'),
+            'roles' => $this->roleOptions(),
         ]);
     }
 
@@ -66,7 +66,7 @@ class UserManagementController extends Controller
     {
         return view('admin.users.edit', [
             'user' => $user->load('roles'),
-            'roles' => Role::query()->orderBy('name')->pluck('name'),
+            'roles' => $this->roleOptions(),
         ]);
     }
 
@@ -95,5 +95,25 @@ class UserManagementController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('status', 'Data user berhasil diperbarui.');
+    }
+
+    private function roleOptions(): array
+    {
+        return [
+            'admin' => 'Admin',
+            'petugas' => 'Petugas',
+            'user' => 'User',
+            'teknisi' => 'Teknisi',
+        ];
+    }
+
+    private function roleBadges(): array
+    {
+        return [
+            'admin' => 'bg-emerald-600 text-white ring-emerald-600',
+            'petugas' => 'bg-rose-600 text-white ring-rose-600',
+            'user' => 'bg-sky-600 text-white ring-sky-600',
+            'teknisi' => 'bg-amber-400 text-slate-900 ring-amber-400',
+        ];
     }
 }

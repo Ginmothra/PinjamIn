@@ -18,7 +18,18 @@ class RoleSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        foreach (['admin', 'worker', 'user', 'technician'] as $roleName) {
+        foreach ([
+            'worker' => 'petugas',
+            'technician' => 'teknisi',
+        ] as $oldRoleName => $newRoleName) {
+            $oldRole = Role::query()->where('name', $oldRoleName)->where('guard_name', 'web')->first();
+
+            if ($oldRole && ! Role::query()->where('name', $newRoleName)->where('guard_name', 'web')->exists()) {
+                $oldRole->update(['name' => $newRoleName]);
+            }
+        }
+
+        foreach (['admin', 'petugas', 'user', 'teknisi'] as $roleName) {
             Role::findOrCreate($roleName, 'web');
         }
     }

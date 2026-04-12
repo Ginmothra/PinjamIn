@@ -27,8 +27,8 @@
                         <x-input-label for="role" value="Role" />
                         <select id="role" name="role" class="mt-1 block w-full rounded-md border-gray-300" required>
                             <option value="">Pilih role</option>
-                            @foreach ($roles as $role)
-                                <option value="{{ $role }}" @selected(old('role') === $role)>{{ $role }}</option>
+                            @foreach ($roles as $value => $label)
+                                <option value="{{ $value }}" @selected(old('role') === $value)>{{ $label }}</option>
                             @endforeach
                         </select>
                         <x-input-error class="mt-2" :messages="$errors->get('role')" />
