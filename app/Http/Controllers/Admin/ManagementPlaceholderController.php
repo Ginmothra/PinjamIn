@@ -12,11 +12,6 @@ class ManagementPlaceholderController extends Controller
         return $this->render('Kategori', 'CRUD kategori akan dilanjutkan di tahap berikutnya.');
     }
 
-    public function item(): View
-    {
-        return $this->render('Barang', 'CRUD barang akan dilanjutkan di tahap berikutnya.');
-    }
-
     public function loan(): View
     {
         return $this->render('Peminjaman', 'CRUD peminjaman multi-barang sedang disiapkan.');
