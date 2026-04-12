@@ -30,10 +30,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/manajemen/log-aktifitas', [ManagementPlaceholderController::class, 'activityLog'])->name('activity-log.index');
 
     Route::get('/manajemen/users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::get('/manajemen/users/create', [UserManagementController::class, 'create'])->name('users.create');
+    Route::post('/manajemen/users', [UserManagementController::class, 'store'])->name('users.store');
     Route::get('/manajemen/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
     Route::put('/manajemen/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
-    Route::patch('/manajemen/users/{user}/approve', [UserManagementController::class, 'approve'])->name('users.approve');
-    Route::patch('/manajemen/users/{user}/reject', [UserManagementController::class, 'reject'])->name('users.reject');
 });
 
 require __DIR__.'/auth.php';

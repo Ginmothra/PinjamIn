@@ -56,20 +56,6 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        if ($user->status === 'pending') {
-            throw ValidationException::withMessages([
-                'email' => 'Akun kamu masih menunggu persetujuan admin.',
-            ]);
-        }
-
-        if ($user->status === 'rejected') {
-            $reason = $user->rejection_reason ? ' Alasan: '.$user->rejection_reason : '';
-
-            throw ValidationException::withMessages([
-                'email' => 'Pengajuan akun kamu ditolak.'.$reason,
-            ]);
-        }
-
         if (! Auth::attempt(['email' => $email, 'password' => $password], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 

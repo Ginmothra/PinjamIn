@@ -35,19 +35,14 @@
                     </div>
 
                     <div>
-                        <x-input-label for="status" value="Status" />
-                        <select id="status" name="status" class="mt-1 block w-full rounded-md border-gray-300" required>
-                            @foreach (['pending', 'approved', 'rejected'] as $status)
-                                <option value="{{ $status }}" @selected(old('status', $user->status) === $status)>{{ ucfirst($status) }}</option>
-                            @endforeach
-                        </select>
-                        <x-input-error class="mt-2" :messages="$errors->get('status')" />
+                        <x-input-label for="password" value="Password Baru (opsional)" />
+                        <x-text-input id="password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+                        <x-input-error class="mt-2" :messages="$errors->get('password')" />
                     </div>
 
                     <div>
-                        <x-input-label for="rejection_reason" value="Alasan Reject (opsional)" />
-                        <textarea id="rejection_reason" name="rejection_reason" rows="4" class="mt-1 block w-full rounded-md border-gray-300">{{ old('rejection_reason', $user->rejection_reason) }}</textarea>
-                        <x-input-error class="mt-2" :messages="$errors->get('rejection_reason')" />
+                        <x-input-label for="password_confirmation" value="Konfirmasi Password Baru" />
+                        <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
                     </div>
 
                     <div class="flex justify-end gap-3">

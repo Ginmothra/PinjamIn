@@ -31,8 +31,8 @@
                     <p class="mt-2 text-3xl font-semibold text-gray-900">{{ $stats['total_categories'] }}</p>
                 </div>
                 <div class="bg-white shadow-sm rounded-lg p-5">
-                    <p class="text-sm text-gray-500">User Pending Approval</p>
-                    <p class="mt-2 text-3xl font-semibold text-orange-600">{{ $stats['pending_users'] }}</p>
+                    <p class="text-sm text-gray-500">Total User</p>
+                    <p class="mt-2 text-3xl font-semibold text-gray-900">{{ $stats['total_users'] }}</p>
                 </div>
             </div>
 

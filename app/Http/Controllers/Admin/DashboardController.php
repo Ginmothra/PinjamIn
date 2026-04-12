@@ -26,7 +26,7 @@ class DashboardController extends Controller
                 'returns_total' => LoanReturn::query()->count(),
                 'total_items' => Item::query()->count(),
                 'total_categories' => Category::query()->count(),
-                'pending_users' => User::query()->where('status', 'pending')->count(),
+                'total_users' => User::query()->count(),
             ],
             'loanStatusCounts' => $loanStatusCounts,
         ]);
