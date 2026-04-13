@@ -39,6 +39,7 @@ class UserManagementController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)],
+            'kelas' => ['nullable', 'string', 'max:100', 'required_if:role,user'],
             'role' => ['required', 'string', 'exists:roles,name'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
@@ -46,6 +47,7 @@ class UserManagementController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'kelas' => $validated['kelas'] ?? null,
             'password' => Hash::make($validated['password']),
             'status' => 'approved',
         ]);
@@ -75,6 +77,7 @@ class UserManagementController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            'kelas' => ['nullable', 'string', 'max:100', 'required_if:role,user'],
             'role' => ['required', 'string', 'exists:roles,name'],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
         ]);
@@ -82,6 +85,7 @@ class UserManagementController extends Controller
         $user->fill([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'kelas' => $validated['kelas'] ?? null,
         ]);
 
         if (! empty($validated['password'])) {

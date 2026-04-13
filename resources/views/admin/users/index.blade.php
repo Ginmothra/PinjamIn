@@ -23,6 +23,7 @@
                             <tr>
                                 <th class="px-5 py-3 font-semibold">Nama</th>
                                 <th class="px-5 py-3 font-semibold">Email</th>
+                                <th class="px-5 py-3 font-semibold">Kelas</th>
                                 <th class="px-5 py-3 font-semibold">Role</th>
                                 <th class="px-5 py-3 font-semibold">Aksi</th>
                             </tr>
@@ -32,6 +33,7 @@
                                 <tr>
                                     <td class="px-5 py-4 font-medium text-slate-900">{{ $user->name }}</td>
                                     <td class="px-5 py-4 text-slate-600">{{ $user->email }}</td>
+                                    <td class="px-5 py-4 text-slate-600">{{ $user->kelas ?? '-' }}</td>
                                     <td class="px-5 py-4">
                                         <div class="flex flex-wrap gap-2">
                                             @forelse ($user->roles as $role)
@@ -61,7 +63,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-5 py-8 text-center text-slate-500">Belum ada data user.</td>
+                                    <td colspan="5" class="px-5 py-8 text-center text-slate-500">Belum ada data user.</td>
                                 </tr>
                             @endforelse
                         </tbody>

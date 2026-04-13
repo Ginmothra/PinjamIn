@@ -24,6 +24,12 @@
                     </div>
 
                     <div>
+                        <x-input-label for="kelas" value="Kelas" />
+                        <x-text-input id="kelas" name="kelas" type="text" class="mt-1 block w-full" :value="old('kelas')" placeholder="Contoh: XII RPL 1" />
+                        <x-input-error class="mt-2" :messages="$errors->get('kelas')" />
+                    </div>
+
+                    <div>
                         <x-input-label for="role" value="Role" />
                         <select id="role" name="role" class="mt-1 block w-full rounded-md border-gray-300" required>
                             <option value="">Pilih role</option>
