@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CategoryManagementController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ItemManagementController;
+use App\Http\Controllers\Admin\LoanManagementController;
 use App\Http\Controllers\Admin\ManagementPlaceholderController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ProfileController;
@@ -40,7 +41,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::put('/manajemen/barang/{item}', [ItemManagementController::class, 'update'])->name('items.update');
     Route::delete('/manajemen/barang/{item}', [ItemManagementController::class, 'destroy'])->name('items.destroy');
 
-    Route::get('/manajemen/peminjaman', [ManagementPlaceholderController::class, 'loan'])->name('loans.index');
+    Route::get('/manajemen/peminjaman', [LoanManagementController::class, 'index'])->name('loans.index');
+    Route::get('/manajemen/peminjaman/create', [LoanManagementController::class, 'create'])->name('loans.create');
+    Route::post('/manajemen/peminjaman', [LoanManagementController::class, 'store'])->name('loans.store');
+    Route::get('/manajemen/peminjaman/{loan}', [LoanManagementController::class, 'show'])->name('loans.show');
+    Route::get('/manajemen/peminjaman/{loan}/edit', [LoanManagementController::class, 'edit'])->name('loans.edit');
+    Route::put('/manajemen/peminjaman/{loan}', [LoanManagementController::class, 'update'])->name('loans.update');
+    Route::delete('/manajemen/peminjaman/{loan}', [LoanManagementController::class, 'destroy'])->name('loans.destroy');
     Route::get('/manajemen/pengembalian', [ManagementPlaceholderController::class, 'loanReturn'])->name('returns.index');
     Route::get('/manajemen/log-aktifitas', [ManagementPlaceholderController::class, 'activityLog'])->name('activity-log.index');
 
