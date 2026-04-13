@@ -94,7 +94,7 @@ class LoanManagementController extends Controller
             'items.*.notes' => ['nullable', 'string', 'max:500'],
         ]);
 
-        DB::transaction(function () use ($validated): void {
+        DB::transaction(function () use ($validated, $request): void {
             $loan = Loan::create([
                 'loan_code' => $validated['loan_code'],
                 'user_id' => $validated['user_id'],
@@ -112,6 +112,8 @@ class LoanManagementController extends Controller
                     'notes' => $loanItem['notes'] ?? null,
                 ]);
             }
+
+            $this->syncReturnRecordFromLoanStatus($loan, (int) $request->user()->id);
         });
 
         return redirect()->route('admin.loans.index')
@@ -168,7 +170,7 @@ class LoanManagementController extends Controller
             'items.*.notes' => ['nullable', 'string', 'max:500'],
         ]);
 
-        DB::transaction(function () use ($loan, $validated): void {
+        DB::transaction(function () use ($loan, $validated, $request): void {
             $loan->update([
                 'loan_code' => $validated['loan_code'],
                 'user_id' => $validated['user_id'],
@@ -194,6 +196,8 @@ class LoanManagementController extends Controller
                     ]
                 );
             }
+
+            $this->syncReturnRecordFromLoanStatus($loan, (int) $request->user()->id);
         });
 
         return redirect()->route('admin.loans.index')
@@ -219,15 +223,17 @@ class LoanManagementController extends Controller
             'pending' => 'Pending',
             'borrowed' => 'Dipinjam',
             'returned' => 'Dikembalikan',
+            'completed' => 'Selesai',
         ];
     }
 
     private function statusBadges(): array
     {
         return [
-            'pending' => 'bg-amber-400 text-slate-900 ring-amber-400',
+            'pending' => 'bg-orange-500 text-white ring-orange-500',
             'borrowed' => 'bg-rose-600 text-white ring-rose-600',
-            'returned' => 'bg-emerald-600 text-white ring-emerald-600',
+            'returned' => 'bg-sky-600 text-white ring-sky-600',
+            'completed' => 'bg-emerald-600 text-white ring-emerald-600',
         ];
     }
 
@@ -241,11 +247,12 @@ class LoanManagementController extends Controller
 
     private function availableItems(?Loan $loan = null)
     {
-        $blockedStatuses = ['pending', 'borrowed', 'returned'];
+        $blockedStatuses = ['pending', 'borrowed'];
 
         $items = Item::query()
             ->with('category:id,name')
             ->where('is_active', true)
+            ->where('condition', 'good')
             ->whereDoesntHave('loanItems.loan', function ($builder) use ($blockedStatuses, $loan): void {
                 $builder->whereIn('status', $blockedStatuses);
 
@@ -271,11 +278,16 @@ class LoanManagementController extends Controller
 
     private function isItemAvailableForLoan(int $itemId, ?Loan $loan = null): bool
     {
-        $blockedStatuses = ['pending', 'borrowed', 'returned'];
+        if ($loan !== null && $loan->loanItems()->where('item_id', $itemId)->exists()) {
+            return true;
+        }
+
+        $blockedStatuses = ['pending', 'borrowed'];
 
         $query = Item::query()
             ->whereKey($itemId)
             ->where('is_active', true)
+            ->where('condition', 'good')
             ->whereDoesntHave('loanItems.loan', function ($builder) use ($blockedStatuses, $loan): void {
                 $builder->whereIn('status', $blockedStatuses);
 
@@ -302,6 +314,44 @@ class LoanManagementController extends Controller
             })
             ->values()
             ->all();
+    }
+
+    private function syncReturnRecordFromLoanStatus(Loan $loan, int $processedByUserId): void
+    {
+        if ($loan->status === 'returned') {
+            if (! $loan->returns()->exists()) {
+                $loan->returns()->create([
+                    'user_id' => $processedByUserId,
+                    'return_date' => optional($loan->due_date)->format('Y-m-d') ?? now()->toDateString(),
+                    'status' => 'partial',
+                    'notes' => 'Data pending pengembalian dibuat otomatis dari status peminjaman dikembalikan.',
+                ]);
+            }
+
+            $loan->loanItems()->update(['returned_quantity' => 0]);
+
+            return;
+        }
+
+        if ($loan->status === 'completed') {
+            $loan->returns()->updateOrCreate(
+                ['status' => 'completed'],
+                [
+                    'user_id' => $processedByUserId,
+                    'return_date' => optional($loan->due_date)->format('Y-m-d') ?? now()->toDateString(),
+                    'notes' => 'Data pengembalian selesai dibuat otomatis dari status peminjaman selesai.',
+                ]
+            );
+
+            $loan->returns()->where('status', 'partial')->delete();
+            $loan->loanItems()->update(['returned_quantity' => 1]);
+
+            return;
+        }
+
+        if (! $loan->returns()->where('status', 'completed')->exists()) {
+            $loan->loanItems()->update(['returned_quantity' => 0]);
+        }
     }
 
     private function generateLoanCode(): string

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CategoryManagementController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ItemManagementController;
 use App\Http\Controllers\Admin\LoanManagementController;
+use App\Http\Controllers\Admin\LoanReturnManagementController;
 use App\Http\Controllers\Admin\ManagementPlaceholderController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ProfileController;
@@ -48,7 +49,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/manajemen/peminjaman/{loan}/edit', [LoanManagementController::class, 'edit'])->name('loans.edit');
     Route::put('/manajemen/peminjaman/{loan}', [LoanManagementController::class, 'update'])->name('loans.update');
     Route::delete('/manajemen/peminjaman/{loan}', [LoanManagementController::class, 'destroy'])->name('loans.destroy');
-    Route::get('/manajemen/pengembalian', [ManagementPlaceholderController::class, 'loanReturn'])->name('returns.index');
+    Route::get('/manajemen/pengembalian', [LoanReturnManagementController::class, 'index'])->name('returns.index');
+    Route::get('/manajemen/pengembalian/create', [LoanReturnManagementController::class, 'create'])->name('returns.create');
+    Route::post('/manajemen/pengembalian', [LoanReturnManagementController::class, 'store'])->name('returns.store');
+    Route::get('/manajemen/pengembalian/{loanReturn}', [LoanReturnManagementController::class, 'show'])->name('returns.show');
+    Route::get('/manajemen/pengembalian/{loanReturn}/edit', [LoanReturnManagementController::class, 'edit'])->name('returns.edit');
+    Route::put('/manajemen/pengembalian/{loanReturn}', [LoanReturnManagementController::class, 'update'])->name('returns.update');
+    Route::delete('/manajemen/pengembalian/{loanReturn}', [LoanReturnManagementController::class, 'destroy'])->name('returns.destroy');
     Route::get('/manajemen/log-aktifitas', [ManagementPlaceholderController::class, 'activityLog'])->name('activity-log.index');
 
     Route::get('/manajemen/users', [UserManagementController::class, 'index'])->name('users.index');

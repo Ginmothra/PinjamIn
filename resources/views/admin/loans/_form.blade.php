@@ -74,7 +74,7 @@
             </button>
         </div>
 
-        <p class="mb-3 text-xs text-slate-500">Barang yang sedang ada di peminjaman berstatus pending, dipinjam, atau dikembalikan tidak akan ditampilkan.</p>
+        <p class="mb-3 text-xs text-slate-500">Barang dengan kondisi rusak atau sedang diperbaiki, serta barang yang sedang ada di peminjaman berstatus pending atau dipinjam, tidak akan ditampilkan.</p>
 
         <x-input-error class="mb-3" :messages="$errors->get('items')" />
 

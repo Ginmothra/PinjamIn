@@ -5,7 +5,7 @@
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                     Manajemen Barang
                 </h2>
-                <p class="mt-1 text-sm text-gray-500">Kelola inventaris barang yang dapat dipinjam.</p>
+                <p class="mt-1 text-sm text-gray-500">Kelola inventaris barang dan kondisi barang yang dapat dipinjam.</p>
             </div>
             <a href="{{ route('admin.items.create') }}" class="inline-flex items-center px-4 py-2 bg-white border border-black rounded-md font-semibold text-xs text-blue-600 uppercase tracking-widest shadow-sm transition ease-in-out duration-150 hover:bg-blue-600 hover:text-white hover:border-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                 Tambah Barang
@@ -25,11 +25,11 @@
                     </div>
 
                     <div>
-                        <label for="status" class="text-xs font-semibold uppercase tracking-wide text-slate-500">Status</label>
-                        <select id="status" name="status" class="mt-1 block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-sky-500 focus:ring-sky-500">
-                            <option value="">Semua Status</option>
-                            @foreach ($itemStatusOptions as $value => $label)
-                                <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
+                        <label for="condition" class="text-xs font-semibold uppercase tracking-wide text-slate-500">Kondisi</label>
+                        <select id="condition" name="condition" class="mt-1 block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-sky-500 focus:ring-sky-500">
+                            <option value="">Semua Kondisi</option>
+                            @foreach ($conditionOptions as $value => $label)
+                                <option value="{{ $value }}" @selected(($filters['condition'] ?? '') === $value)>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -52,23 +52,22 @@
                                 <th class="px-5 py-3 font-semibold">Gambar</th>
                                 <th class="px-5 py-3 font-semibold">Kode</th>
                                 <th class="px-5 py-3 font-semibold">Nama</th>
-                                <th class="px-5 py-3 font-semibold">Status</th>
+                                <th class="px-5 py-3 font-semibold">Kondisi</th>
                                 <th class="px-5 py-3 font-semibold">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             @forelse ($items as $item)
                                 @php
-                                    $loanStatuses = $item->loanItems->pluck('loan.status')->filter();
-                                    $itemStatus = 'aktif';
+                                    $conditionBadgeMap = [
+                                        'good' => 'bg-emerald-600 text-white ring-emerald-600',
+                                        'maintenance' => 'bg-orange-500 text-white ring-orange-500',
+                                        'damaged' => 'bg-rose-600 text-white ring-rose-600',
+                                    ];
 
-                                    if ($loanStatuses->contains('borrowed')) {
-                                        $itemStatus = 'dipinjam';
-                                    } elseif ($loanStatuses->contains('returned')) {
-                                        $itemStatus = 'dikembalikan';
-                                    }
-
-                                    $itemStatusClass = $itemStatusBadges[$itemStatus] ?? 'bg-slate-200 text-slate-800 ring-slate-300';
+                                    $itemCondition = $item->condition;
+                                    $itemConditionLabel = $conditionLabels[$itemCondition] ?? ucfirst((string) $itemCondition);
+                                    $itemConditionClass = $conditionBadgeMap[$itemCondition] ?? 'bg-slate-200 text-slate-800 ring-slate-300';
                                 @endphp
                                 <tr class="item-row cursor-pointer hover:bg-sky-50/40" data-detail-url="{{ route('admin.items.show', $item) }}" tabindex="0" role="link" aria-label="Lihat detail barang {{ $item->name }}">
                                     <td class="px-5 py-4">
@@ -85,8 +84,8 @@
                                         <span class="font-medium text-slate-900">{{ $item->name }}</span>
                                     </td>
                                     <td class="px-5 py-4">
-                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset {{ $itemStatusClass }}">
-                                            {{ ucfirst($itemStatus) }}
+                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset {{ $itemConditionClass }}">
+                                            {{ $itemConditionLabel }}
                                         </span>
                                     </td>
                                     <td class="px-5 py-4 no-row-click">

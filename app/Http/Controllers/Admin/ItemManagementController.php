@@ -17,14 +17,10 @@ class ItemManagementController extends Controller
     {
         $filters = [
             'q' => trim((string) $request->query('q', '')),
-            'status' => (string) $request->query('status', ''),
+            'condition' => (string) $request->query('condition', ''),
         ];
 
-        $query = Item::query()
-            ->with([
-                'loanItems.loan:id,status',
-            ])
-            ->latest();
+        $query = Item::query()->latest();
 
         if ($filters['q'] !== '') {
             $search = $filters['q'];
@@ -35,26 +31,8 @@ class ItemManagementController extends Controller
             });
         }
 
-        if (in_array($filters['status'], ['aktif', 'dipinjam', 'dikembalikan'], true)) {
-            if ($filters['status'] === 'dipinjam') {
-                $query->whereHas('loanItems.loan', function ($builder): void {
-                    $builder->where('status', 'borrowed');
-                });
-            }
-
-            if ($filters['status'] === 'dikembalikan') {
-                $query->whereDoesntHave('loanItems.loan', function ($builder): void {
-                    $builder->where('status', 'borrowed');
-                })->whereHas('loanItems.loan', function ($builder): void {
-                    $builder->where('status', 'returned');
-                });
-            }
-
-            if ($filters['status'] === 'aktif') {
-                $query->whereDoesntHave('loanItems.loan', function ($builder): void {
-                    $builder->whereIn('status', ['borrowed', 'returned']);
-                });
-            }
+        if (array_key_exists($filters['condition'], $this->conditionLabels())) {
+            $query->where('condition', $filters['condition']);
         }
 
         $items = $query->paginate(15)->withQueryString();
@@ -62,12 +40,9 @@ class ItemManagementController extends Controller
         return view('admin.items.index', [
             'items' => $items,
             'filters' => $filters,
-            'itemStatusBadges' => $this->itemStatusBadges(),
-            'itemStatusOptions' => [
-                'aktif' => 'Aktif',
-                'dipinjam' => 'Dipinjam',
-                'dikembalikan' => 'Dikembalikan',
-            ],
+            'conditionLabels' => $this->conditionLabels(),
+            'conditionBadges' => $this->conditionBadges(),
+            'conditionOptions' => $this->conditionLabels(),
         ]);
     }
 
@@ -185,7 +160,7 @@ class ItemManagementController extends Controller
     {
         return [
             'good' => 'Baik',
-            'maintenance' => 'Perawatan',
+            'maintenance' => 'Sedang Diperbaiki',
             'damaged' => 'Rusak',
         ];
     }
@@ -194,17 +169,8 @@ class ItemManagementController extends Controller
     {
         return [
             'good' => 'bg-emerald-600 text-white ring-emerald-600',
-            'maintenance' => 'bg-amber-400 text-slate-900 ring-amber-400',
+            'maintenance' => 'bg-orange-500 text-white ring-orange-500',
             'damaged' => 'bg-rose-600 text-white ring-rose-600',
-        ];
-    }
-
-    private function itemStatusBadges(): array
-    {
-        return [
-            'aktif' => 'bg-emerald-600 text-white ring-emerald-600',
-            'dipinjam' => 'bg-rose-600 text-white ring-rose-600',
-            'dikembalikan' => 'bg-amber-400 text-slate-900 ring-amber-400',
         ];
     }
 }
