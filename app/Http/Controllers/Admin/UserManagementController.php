@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\TemplateExport;
+use App\Exports\UsersExport;
 use App\Http\Controllers\Controller;
+use App\Imports\UsersImport;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,7 +13,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\PermissionRegistrar;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class UserManagementController extends Controller
 {
@@ -24,6 +29,7 @@ class UserManagementController extends Controller
         return view('admin.users.index', [
             'users' => $users,
             'roleBadges' => $this->roleBadges(),
+            'roleLabels' => $this->roleOptions(),
         ]);
     }
 
@@ -116,13 +122,54 @@ class UserManagementController extends Controller
             ->with('status', 'User berhasil dihapus.');
     }
 
+    public function export(): BinaryFileResponse
+    {
+        return Excel::download(new UsersExport(), 'users-export-' . now()->format('Ymd_His') . '.xlsx');
+    }
+
+    public function template(): BinaryFileResponse
+    {
+        return Excel::download(
+            new TemplateExport(
+                ['name', 'email', 'kelas', 'role', 'status', 'password'],
+                ['Rafli Maulana', 'rafli@example.com', 'XII RPL 1', 'user', 'approved', 'password123'],
+            ),
+            'users-template.xlsx',
+        );
+    }
+
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
+        ]);
+
+        try {
+            $import = new UsersImport();
+            Excel::import($import, $request->file('file'));
+            
+            $errors = $import->getErrors();
+            if (!empty($errors)) {
+                return redirect()->route('admin.users.index')
+                    ->with('status', 'Import user selesai dengan ' . count($errors) . ' baris gagal.')
+                    ->with('import_errors', $errors);
+            }
+        } catch (\Throwable) {
+            return redirect()->route('admin.users.index')
+                ->with('status', 'Import user gagal. Pastikan file sesuai template.');
+        }
+
+        return redirect()->route('admin.users.index')
+            ->with('status', 'Import user berhasil diproses.');
+    }
+
     private function roleOptions(): array
     {
         return [
             'admin' => 'Admin',
-            'petugas' => 'Petugas',
+            'worker' => 'Petugas',
             'user' => 'User',
-            'teknisi' => 'Teknisi',
+            'technician' => 'Teknisi',
         ];
     }
 
@@ -130,9 +177,9 @@ class UserManagementController extends Controller
     {
         return [
             'admin' => 'bg-emerald-600 text-white ring-emerald-600',
-            'petugas' => 'bg-rose-600 text-white ring-rose-600',
+            'worker' => 'bg-rose-600 text-white ring-rose-600',
             'user' => 'bg-sky-600 text-white ring-sky-600',
-            'teknisi' => 'bg-amber-400 text-slate-900 ring-amber-400',
+            'technician' => 'bg-amber-500 text-slate-900 ring-amber-500',
         ];
     }
 }

@@ -7,14 +7,9 @@
                 </h2>
                 <p class="mt-1 text-sm text-gray-500">Informasi lengkap barang dan atribut pendukungnya.</p>
             </div>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('admin.items.index') }}" class="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50">
-                    Kembali
-                </a>
-                <a href="{{ route('admin.items.edit', $item) }}" class="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-sky-700 ring-1 ring-sky-200 hover:bg-sky-50">
-                    Edit Barang
-                </a>
-            </div>
+            <a href="{{ route('admin.items.index') }}" class="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50">
+                Kembali
+            </a>
         </div>
     </x-slot>
 

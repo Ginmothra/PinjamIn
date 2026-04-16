@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\ItemsExport;
+use App\Exports\TemplateExport;
 use App\Http\Controllers\Controller;
+use App\Imports\ItemsImport;
 use App\Models\Category;
 use App\Models\Item;
 use Illuminate\Http\RedirectResponse;
@@ -10,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ItemManagementController extends Controller
 {
@@ -154,6 +159,47 @@ class ItemManagementController extends Controller
 
         return redirect()->route('admin.items.index')
             ->with('status', 'Barang berhasil dihapus.');
+    }
+
+    public function export(): BinaryFileResponse
+    {
+        return Excel::download(new ItemsExport(), 'items-export-' . now()->format('Ymd_His') . '.xlsx');
+    }
+
+    public function template(): BinaryFileResponse
+    {
+        return Excel::download(
+            new TemplateExport(
+                ['code', 'name', 'category_name', 'description', 'condition', 'is_active'],
+                ['BRG-001', 'Laptop Inventaris', 'Elektronik', 'Laptop untuk operasional', 'good', 1],
+            ),
+            'items-template.xlsx',
+        );
+    }
+
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
+        ]);
+
+        try {
+            $import = new ItemsImport();
+            Excel::import($import, $request->file('file'));
+            
+            $errors = $import->getErrors();
+            if (!empty($errors)) {
+                return redirect()->route('admin.items.index')
+                    ->with('status', 'Import barang selesai dengan ' . count($errors) . ' baris gagal.')
+                    ->with('import_errors', $errors);
+            }
+        } catch (\Throwable) {
+            return redirect()->route('admin.items.index')
+                ->with('status', 'Import barang gagal. Pastikan file sesuai template.');
+        }
+
+        return redirect()->route('admin.items.index')
+            ->with('status', 'Import barang berhasil diproses.');
     }
 
     private function conditionLabels(): array

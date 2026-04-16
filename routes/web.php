@@ -35,6 +35,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::delete('/manajemen/kategori/{category}', [CategoryManagementController::class, 'destroy'])->name('categories.destroy');
 
     Route::get('/manajemen/barang', [ItemManagementController::class, 'index'])->name('items.index');
+    Route::get('/manajemen/barang/export', [ItemManagementController::class, 'export'])->name('items.export');
+    Route::get('/manajemen/barang/template', [ItemManagementController::class, 'template'])->name('items.template');
+    Route::post('/manajemen/barang/import', [ItemManagementController::class, 'import'])->name('items.import');
     Route::get('/manajemen/barang/create', [ItemManagementController::class, 'create'])->name('items.create');
     Route::post('/manajemen/barang', [ItemManagementController::class, 'store'])->name('items.store');
     Route::get('/manajemen/barang/{item}', [ItemManagementController::class, 'show'])->name('items.show');
@@ -59,6 +62,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/manajemen/log-aktifitas', [ManagementPlaceholderController::class, 'activityLog'])->name('activity-log.index');
 
     Route::get('/manajemen/users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::get('/manajemen/users/export', [UserManagementController::class, 'export'])->name('users.export');
+    Route::get('/manajemen/users/template', [UserManagementController::class, 'template'])->name('users.template');
+    Route::post('/manajemen/users/import', [UserManagementController::class, 'import'])->name('users.import');
     Route::get('/manajemen/users/create', [UserManagementController::class, 'create'])->name('users.create');
     Route::post('/manajemen/users', [UserManagementController::class, 'store'])->name('users.store');
     Route::get('/manajemen/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
