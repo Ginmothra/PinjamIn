@@ -40,7 +40,7 @@ class UsersImport implements ToCollection, WithHeadingRow
             $user = User::query()->firstOrNew(['email' => $email]);
             $user->name = $name;
             $user->kelas = $this->nullableText($row['kelas'] ?? null);
-            $user->status = $this->normalizeStatus($row['status'] ?? null);
+            $user->is_active = $this->normalizeIsActive($row['is_active'] ?? null);
 
             $password = trim((string) ($row['password'] ?? ''));
             if (! $user->exists) {
@@ -77,11 +77,28 @@ class UsersImport implements ToCollection, WithHeadingRow
         return in_array($role, $allowed, true) ? $role : 'user';
     }
 
-    private function normalizeStatus(mixed $value): string
+    private function normalizeIsActive(mixed $value): bool
     {
-        $status = strtolower(trim((string) $value));
-        $allowed = ['pending', 'approved', 'rejected'];
+        if ($value === null) {
+            return true;
+        }
 
-        return in_array($status, $allowed, true) ? $status : 'approved';
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        $normalized = strtolower(trim((string) $value));
+        $truthy = ['1', 'true', 'yes', 'y', 'aktif', 'active'];
+        $falsy = ['0', 'false', 'no', 'n', 'nonaktif', 'inactive'];
+
+        if (in_array($normalized, $truthy, true)) {
+            return true;
+        }
+
+        if (in_array($normalized, $falsy, true)) {
+            return false;
+        }
+
+        return true;
     }
 }

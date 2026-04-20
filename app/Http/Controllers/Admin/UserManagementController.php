@@ -10,12 +10,17 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserActivationMail;
+use Illuminate\Auth\Passwords\PasswordBroker;
 
 class UserManagementController extends Controller
 {
@@ -47,20 +52,17 @@ class UserManagementController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)],
             'kelas' => ['nullable', 'string', 'max:100', 'required_if:role,user'],
             'role' => ['required', 'string', 'exists:roles,name'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'kelas' => $validated['kelas'] ?? null,
-            'password' => Hash::make($validated['password']),
-            'status' => 'approved',
+            'password' => Str::random(64),
+            'is_active' => false,
         ]);
 
-        $user->forceFill([
-            'email_verified_at' => now(),
-        ])->save();
+        $this->sendActivationInvitation($user);
 
         $user->syncRoles([$validated['role']]);
 
@@ -122,6 +124,19 @@ class UserManagementController extends Controller
             ->with('status', 'User berhasil dihapus.');
     }
 
+    public function resendActivation(User $user): RedirectResponse
+    {
+        if ($user->is_active) {
+            return redirect()->route('admin.users.index')
+                ->with('status', 'User sudah aktif.');
+        }
+
+        $this->sendActivationInvitation($user);
+
+        return redirect()->route('admin.users.index')
+            ->with('status', 'Email aktivasi berhasil dikirim ulang.');
+    }
+
     public function export(): BinaryFileResponse
     {
         return Excel::download(new UsersExport(), 'users-export-' . now()->format('Ymd_His') . '.xlsx');
@@ -131,8 +146,8 @@ class UserManagementController extends Controller
     {
         return Excel::download(
             new TemplateExport(
-                ['name', 'email', 'kelas', 'role', 'status', 'password'],
-                ['Rafli Maulana', 'rafli@example.com', 'XII RPL 1', 'user', 'approved', 'password123'],
+                ['name', 'email', 'kelas', 'role'],
+                ['Rafli Maulana', 'rafli@example.com', 'XII RPL 1', 'user'],
             ),
             'users-template.xlsx',
         );
@@ -181,5 +196,18 @@ class UserManagementController extends Controller
             'user' => 'bg-sky-600 text-white ring-sky-600',
             'technician' => 'bg-amber-500 text-slate-900 ring-amber-500',
         ];
+    }
+
+    private function sendActivationInvitation(User $user): void
+    {
+        /** @var PasswordBroker $broker */
+        $broker = Password::broker();
+        $token = $broker->createToken($user);
+        $resetUrl = route('password.reset', [
+            'token' => $token,
+            'email' => $user->email,
+        ]);
+
+        Mail::to($user->email)->send(new UserActivationMail($user, $resetUrl));
     }
 }

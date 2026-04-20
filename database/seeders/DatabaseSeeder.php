@@ -24,8 +24,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'admin',
             'email' => 'admin@test',
             'password' => Hash::make('password'),
-            'status' => 'approved',
-            'approved_at' => now(),
+            'is_active' => true,
         ]);
 
         $user->assignRole('admin');

@@ -51,6 +51,7 @@
                                 <th class="px-5 py-3 font-semibold">Email</th>
                                 <th class="px-5 py-3 font-semibold">Kelas</th>
                                 <th class="px-5 py-3 font-semibold">Role</th>
+                                <th class="px-5 py-3 font-semibold">Status</th>
                                 <th class="px-5 py-3 font-semibold">Aksi</th>
                             </tr>
                         </thead>
@@ -75,6 +76,17 @@
                                         </div>
                                     </td>
                                     <td class="px-5 py-4">
+                                        @if ($user->is_active)
+                                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset bg-emerald-100 text-emerald-800 ring-emerald-300">
+                                                Aktif
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset bg-slate-100 text-slate-800 ring-slate-300">
+                                                Tidak Aktif
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="px-5 py-4">
                                         <div class="flex items-center gap-2">
                                             <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium text-sky-700 transition hover:bg-sky-50 hover:text-sky-900">Edit</a>
                                             <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="delete-user-form inline-flex" data-user-name="{{ $user->name }}">
@@ -84,12 +96,20 @@
                                                     Hapus
                                                 </button>
                                             </form>
+                                            @if (!$user->is_active)
+                                                <form method="POST" action="{{ route('admin.users.resend-activation', $user) }}" class="inline-flex">
+                                                    @csrf
+                                                    <button type="submit" class="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition hover:bg-amber-50 hover:text-amber-900">
+                                                        Kirim Ulang Email
+                                                    </button>
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-5 py-8 text-center text-slate-500">Belum ada data user.</td>
+                                    <td colspan="6" class="px-5 py-8 text-center text-slate-500">Belum ada data user.</td>
                                 </tr>
                             @endforelse
                         </tbody>
