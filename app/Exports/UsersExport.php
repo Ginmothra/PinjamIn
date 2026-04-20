@@ -20,7 +20,7 @@ class UsersExport implements FromCollection, WithHeadings
                 'email' => $user->email,
                 'kelas' => $user->kelas,
                 'role' => $user->roles->pluck('name')->first(),
-                'status' => $user->status,
+                'status' => $user->is_active ? 'Aktif' : 'Tidak Aktif',
             ]);
     }
 

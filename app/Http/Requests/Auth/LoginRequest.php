@@ -56,6 +56,12 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        if (! $user->is_active) {
+            throw ValidationException::withMessages([
+                'email' => 'Akun belum aktif. Cek email Anda untuk mengganti password terlebih dahulu.',
+            ]);
+        }
+
         if (! Auth::attempt(['email' => $email, 'password' => $password], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 

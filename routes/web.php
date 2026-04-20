@@ -84,7 +84,9 @@ Route::middleware(['auth', 'verified', 'role:worker'])->prefix('worker')->name('
     Route::get('/dashboard', [WorkerDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/peminjaman', [WorkerLoansController::class, 'index'])->name('loans.index');
-    Route::get('/peminjaman/{loan}', [WorkerLoansController::class, 'show'])->name('loans.show');
+    Route::post('/peminjaman/{loan}/approve', [WorkerLoansController::class, 'approve'])->name('loans.approve');
+    Route::get('/peminjaman/{loan}/reject', [WorkerLoansController::class, 'rejectForm'])->name('loans.reject-form');
+    Route::post('/peminjaman/{loan}/reject', [WorkerLoansController::class, 'reject'])->name('loans.reject');
 
     Route::get('/pengembalian', [WorkerReturnsController::class, 'index'])->name('returns.index');
     Route::get('/pengembalian/{loanReturn}', [WorkerReturnsController::class, 'show'])->name('returns.show');

@@ -240,7 +240,7 @@ class LoanManagementController extends Controller
     private function approvedUsers()
     {
         return User::query()
-            ->where('status', 'approved')
+            ->where('is_active', true)
             ->orderBy('name')
             ->get(['id', 'name', 'email', 'kelas']);
     }

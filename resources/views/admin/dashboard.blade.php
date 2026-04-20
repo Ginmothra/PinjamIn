@@ -10,27 +10,27 @@
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div class="bg-white shadow-sm rounded-lg p-5">
+                <div class="bg-white shadow-md rounded-lg p-5">
                     <p class="text-sm text-gray-500">Peminjaman Berlangsung</p>
                     <p class="mt-2 text-3xl font-semibold text-gray-900">{{ $stats['ongoing_loans'] }}</p>
                 </div>
-                <div class="bg-white shadow-sm rounded-lg p-5">
+                <div class="bg-white shadow-md rounded-lg p-5">
                     <p class="text-sm text-gray-500">Peminjaman Pending</p>
                     <p class="mt-2 text-3xl font-semibold text-gray-900">{{ $stats['pending_loans'] }}</p>
                 </div>
-                <div class="bg-white shadow-sm rounded-lg p-5">
+                <div class="bg-white shadow-md rounded-lg p-5">
                     <p class="text-sm text-gray-500">Total Pengembalian</p>
                     <p class="mt-2 text-3xl font-semibold text-gray-900">{{ $stats['returns_total'] }}</p>
                 </div>
-                <div class="bg-white shadow-sm rounded-lg p-5">
+                <div class="bg-white shadow-md rounded-lg p-5">
                     <p class="text-sm text-gray-500">Total Barang</p>
                     <p class="mt-2 text-3xl font-semibold text-gray-900">{{ $stats['total_items'] }}</p>
                 </div>
-                <div class="bg-white shadow-sm rounded-lg p-5">
+                <div class="bg-white shadow-md rounded-lg p-5">
                     <p class="text-sm text-gray-500">Total Kategori</p>
                     <p class="mt-2 text-3xl font-semibold text-gray-900">{{ $stats['total_categories'] }}</p>
                 </div>
-                <div class="bg-white shadow-sm rounded-lg p-5">
+                <div class="bg-white shadow-md rounded-lg p-5">
                     <p class="text-sm text-gray-500">Total User</p>
                     <p class="mt-2 text-3xl font-semibold text-gray-900">{{ $stats['total_users'] }}</p>
                 </div>

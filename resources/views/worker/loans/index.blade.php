@@ -18,7 +18,7 @@
             <!-- Search & Filter -->
             <div class="mb-6 rounded-lg bg-white p-4 shadow-sm">
                 <form method="GET" class="flex gap-3">
-                    <input type="text" name="search" placeholder="Cari peminjam..." class="flex-1 rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+                    <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Cari kode atau peminjam..." class="flex-1 rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
                     <button type="submit" class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">
                         Cari
                     </button>
@@ -29,16 +29,10 @@
             @php
                 $statusLabels = [
                     'pending' => 'Pending',
-                    'borrowed' => 'Dipinjam',
-                    'returned' => 'Dikembalikan',
-                    'completed' => 'Selesai',
                 ];
 
                 $statusBadges = [
                     'pending' => 'bg-orange-500 text-white ring-orange-500',
-                    'borrowed' => 'bg-rose-600 text-white ring-rose-600',
-                    'returned' => 'bg-sky-600 text-white ring-sky-600',
-                    'completed' => 'bg-emerald-600 text-white ring-emerald-600',
                 ];
             @endphp
 
@@ -51,7 +45,6 @@
                                 <th class="px-5 py-3 font-semibold">Peminjam</th>
                                 <th class="px-5 py-3 font-semibold">Tanggal</th>
                                 <th class="px-5 py-3 font-semibold">Jumlah Barang</th>
-                                <th class="px-5 py-3 font-semibold">Status</th>
                                 <th class="px-5 py-3 font-semibold">Aksi</th>
                             </tr>
                         </thead>
@@ -65,26 +58,29 @@
                                             <p class="text-xs text-gray-500">{{ $loan->user->email }}</p>
                                         </div>
                                     </td>
-                                    <td class="px-5 py-4 text-gray-600">{{ $loan->created_at->format('d M Y') }}</td>
-                                    <td class="px-5 py-4">{{ $loan->loanItems->count() }} barang</td>
+                                    <td class="px-5 py-4 text-gray-600">{{ $loan->loan_date->format('d M Y') }}</td>
+                                    <td class="px-5 py-4">{{ $loan->loan_items_count }} barang</td>
                                     <td class="px-5 py-4">
-                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset {{ $statusBadges[$loan->status] ?? 'bg-gray-100 text-gray-700 ring-gray-600' }}">
-                                            {{ $statusLabels[$loan->status] ?? $loan->status }}
-                                        </span>
-                                    </td>
-                                    <td class="px-5 py-4">
-                                        <a href="{{ route('worker.loans.show', $loan) }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                                            Lihat Detail
-                                        </a>
+                                        <div class="flex flex-wrap gap-2">
+                                            <form method="POST" action="{{ route('worker.loans.approve', $loan) }}" onsubmit="return confirm('Approve peminjaman ini?')">
+                                                @csrf
+                                                <button type="submit" class="inline-flex items-center rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700">
+                                                    Approve
+                                                </button>
+                                            </form>
+                                            <a href="{{ route('worker.loans.reject-form', $loan) }}" class="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-700">
+                                                Reject
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-5 py-12 text-center text-gray-500">
+                                    <td colspan="5" class="px-5 py-12 text-center text-gray-500">
                                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                                         </svg>
-                                        <p class="mt-4 font-medium">Tidak ada data peminjaman</p>
+                                        <p class="mt-4 font-medium">Tidak ada peminjaman pending</p>
                                     </td>
                                 </tr>
                             @endforelse
