@@ -37,6 +37,18 @@
                                 <x-dropdown-link :href="route('admin.activity-log.index')">Log Aktifitas</x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
+                    @elserole('worker')
+                        <x-nav-link :href="route('worker.dashboard')" :active="request()->routeIs('worker.dashboard')">
+                            Dashboard
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('worker.loans.index')" :active="request()->routeIs('worker.loans.*')">
+                            Peminjaman
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('worker.returns.index')" :active="request()->routeIs('worker.returns.*')">
+                            Pengembalian
+                        </x-nav-link>
                     @else
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                             Dashboard
@@ -115,6 +127,16 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.activity-log.index')" :active="request()->routeIs('admin.activity-log.*')">
                     Log Aktifitas
+                </x-responsive-nav-link>
+            @elserole('worker')
+                <x-responsive-nav-link :href="route('worker.dashboard')" :active="request()->routeIs('worker.dashboard')">
+                    Dashboard
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('worker.loans.index')" :active="request()->routeIs('worker.loans.*')">
+                    Peminjaman
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('worker.returns.index')" :active="request()->routeIs('worker.returns.*')">
+                    Pengembalian
                 </x-responsive-nav-link>
             @else
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">

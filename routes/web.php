@@ -7,12 +7,19 @@ use App\Http\Controllers\Admin\LoanManagementController;
 use App\Http\Controllers\Admin\LoanReturnManagementController;
 use App\Http\Controllers\Admin\ManagementPlaceholderController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Worker\DashboardController as WorkerDashboardController;
+use App\Http\Controllers\Worker\LoansController as WorkerLoansController;
+use App\Http\Controllers\Worker\ReturnsController as WorkerReturnsController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (auth()->user()->hasRole('admin')) {
         return redirect()->route('admin.dashboard');
+    }
+
+    if (auth()->user()->hasRole('worker')) {
+        return redirect()->route('worker.dashboard');
     }
 
     return view('dashboard');
@@ -71,6 +78,16 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::put('/manajemen/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
     Route::post('/manajemen/users/{user}/resend-activation', [UserManagementController::class, 'resendActivation'])->name('users.resend-activation');
     Route::delete('/manajemen/users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
+});
+
+Route::middleware(['auth', 'verified', 'role:worker'])->prefix('worker')->name('worker.')->group(function () {
+    Route::get('/dashboard', [WorkerDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/peminjaman', [WorkerLoansController::class, 'index'])->name('loans.index');
+    Route::get('/peminjaman/{loan}', [WorkerLoansController::class, 'show'])->name('loans.show');
+
+    Route::get('/pengembalian', [WorkerReturnsController::class, 'index'])->name('returns.index');
+    Route::get('/pengembalian/{loanReturn}', [WorkerReturnsController::class, 'show'])->name('returns.show');
 });
 
 require __DIR__.'/auth.php';
