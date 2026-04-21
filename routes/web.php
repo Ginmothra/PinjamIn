@@ -11,7 +11,11 @@ use App\Http\Controllers\Worker\DashboardController as WorkerDashboardController
 use App\Http\Controllers\Worker\LoansController as WorkerLoansController;
 use App\Http\Controllers\Worker\ReturnsController as WorkerReturnsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Auth\AccountActivationController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/activate-account', [AccountActivationController::class, 'show'])->name('activate-account');
+Route::post('/activate-account', [AccountActivationController::class, 'store'])->name('activate-account.store');
 
 Route::get('/', function () {
     if (auth()->user()->hasRole('admin')) {

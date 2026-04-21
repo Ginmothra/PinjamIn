@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -150,6 +151,43 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Password berhasil direset. Silakan login dengan password baru Anda.',
+        ]);
+    }
+
+    /**
+     * Aktivasi Akun (Flow User Baru)
+     */
+    public function activateAccount(Request $request): JsonResponse
+    {
+        $request->validate([
+            'token' => ['required'],
+            'email' => ['required', 'email', 'exists:users,email'],
+            'password' => ['required', 'confirmed', 'min:8'],
+        ]);
+
+        // Cek apakah token valid di database
+        $reset = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$reset || !Hash::check($request->token, $reset->token)) {
+            return response()->json(['message' => 'Token aktivasi tidak valid atau sudah kedaluwarsa.'], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        
+        // Update password dan aktifkan user
+        $user->forceFill([
+            'password' => Hash::make($request->password),
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ])->save();
+
+        // Hapus token setelah dipakai
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        return response()->json([
+            'message' => 'Akun berhasil diaktifkan! Silakan login menggunakan password baru Anda.'
         ]);
     }
 }

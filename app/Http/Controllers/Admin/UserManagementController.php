@@ -203,7 +203,7 @@ class UserManagementController extends Controller
         /** @var PasswordBroker $broker */
         $broker = Password::broker();
         $token = $broker->createToken($user);
-        $resetUrl = route('password.reset', [
+        $resetUrl = route('activate-account', [
             'token' => $token,
             'email' => $user->email,
         ]);
