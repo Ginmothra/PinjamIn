@@ -83,6 +83,7 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
+        $unpaidSum = $user->fines()->where('status', 'unpaid')->sum('amount');
 
         return response()->json([
             'user' => [
@@ -90,6 +91,7 @@ class AuthController extends Controller
                 'name'  => $user->name,
                 'email' => $user->email,
                 'roles' => $user->getRoleNames(),
+                'unpaid_fines_sum' => (float) $unpaidSum,
             ],
         ]);
     }

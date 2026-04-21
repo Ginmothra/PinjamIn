@@ -87,6 +87,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::put('/manajemen/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
     Route::post('/manajemen/users/{user}/resend-activation', [UserManagementController::class, 'resendActivation'])->name('users.resend-activation');
     Route::delete('/manajemen/users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
+
+    Route::get('/manajemen/denda', [\App\Http\Controllers\Admin\FineManagementController::class, 'index'])->name('fines.index');
+    Route::get('/manajemen/denda/{user}', [\App\Http\Controllers\Admin\FineManagementController::class, 'show'])->name('fines.show');
+    Route::post('/manajemen/denda/{user}', [\App\Http\Controllers\Admin\FineManagementController::class, 'store'])->name('fines.store');
+    Route::post('/manajemen/denda/{fine}/pay', [\App\Http\Controllers\Admin\FineManagementController::class, 'markPaid'])->name('fines.pay');
+    Route::delete('/manajemen/denda/{fine}', [\App\Http\Controllers\Admin\FineManagementController::class, 'destroy'])->name('fines.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'role:worker'])->prefix('worker')->name('worker.')->group(function () {

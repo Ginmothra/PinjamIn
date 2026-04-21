@@ -40,4 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('returns', [ReturnController::class, 'index']);
     Route::get('returns/active-loans', [ReturnController::class, 'getActiveLoans']);
     Route::post('returns', [ReturnController::class, 'store']);
+
+    // Fines
+    Route::get('fines', [\App\Http\Controllers\Api\FineController::class, 'index']);
 });

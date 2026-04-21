@@ -34,6 +34,7 @@
                                 <x-dropdown-link :href="route('admin.loans.index')">Peminjaman</x-dropdown-link>
                                 <x-dropdown-link :href="route('admin.returns.index')">Pengembalian</x-dropdown-link>
                                 <x-dropdown-link :href="route('admin.users.index')">User</x-dropdown-link>
+                                <x-dropdown-link :href="route('admin.fines.index')">Denda</x-dropdown-link>
                                 <x-dropdown-link :href="route('admin.activity-log.index')">Log Aktifitas</x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
@@ -132,6 +133,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
                     User
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.fines.index')" :active="request()->routeIs('admin.fines.*')">
+                    Denda
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.activity-log.index')" :active="request()->routeIs('admin.activity-log.*')">
                     Log Aktifitas

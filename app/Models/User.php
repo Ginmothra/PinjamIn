@@ -36,4 +36,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Models\Loan::class);
     }
+
+    public function fines(): HasMany
+    {
+        return $this->hasMany(Fine::class);
+    }
 }

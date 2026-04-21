@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('loan_returns', function (Blueprint $attribute) {
+        Schema::table('returns', function (Blueprint $attribute) {
             $attribute->string('proof_image')->nullable()->after('notes');
         });
     }
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('loan_returns', function (Blueprint $attribute) {
+        Schema::table('returns', function (Blueprint $attribute) {
             $attribute->dropColumn('proof_image');
         });
     }
