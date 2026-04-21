@@ -1,6 +1,8 @@
 <x-app-layout>
     <div class="py-12">
         <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
+            <x-auth-session-status class="mb-4" :status="session('status')" />
+
             <!-- Header -->
             <div class="mb-6 flex items-center justify-between">
                 <h1 class="text-3xl font-bold text-gray-900">Detail Pengembalian</h1>
@@ -11,6 +13,60 @@
                     Kembali
                 </a>
             </div>
+
+            @if($loanReturn->status === 'partial')
+                <div class="mb-6 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                    <div class="flex flex-wrap gap-2">
+                        <form method="POST" action="{{ route('worker.returns.accept', $loanReturn) }}" onsubmit="return confirm('Terima pengembalian ini?')">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+                                Terima
+                            </button>
+                        </form>
+
+                        <form method="POST" action="{{ route('worker.returns.reject', $loanReturn) }}" onsubmit="return confirm('Tolak pengembalian ini?')">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700">
+                                Tolak
+                            </button>
+                        </form>
+
+                        <form method="POST" action="{{ route('worker.returns.damaged', $loanReturn) }}">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600">
+                                Rusak
+                            </button>
+                        </form>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-500">Aksi Rusak saat ini masih placeholder dan akan diproses di modul Technician.</p>
+                </div>
+            @endif
+
+            @php
+                $returnStatusBadges = [
+                    'partial' => 'bg-yellow-100 text-yellow-800 ring-yellow-600',
+                    'completed' => 'bg-green-100 text-green-800 ring-green-600',
+                    'rejected' => 'bg-red-100 text-red-800 ring-red-600',
+                ];
+
+                $returnStatusLabels = [
+                    'partial' => 'Pending',
+                    'completed' => 'Selesai',
+                    'rejected' => 'Ditolak',
+                ];
+
+                $itemConditionBadges = [
+                    'good' => 'bg-green-100 text-green-800',
+                    'maintenance' => 'bg-yellow-100 text-yellow-800',
+                    'damaged' => 'bg-red-100 text-red-800',
+                ];
+
+                $itemConditionLabels = [
+                    'good' => 'Baik',
+                    'maintenance' => 'Perbaikan',
+                    'damaged' => 'Rusak',
+                ];
+            @endphp
 
             <!-- Info Card -->
             <div class="rounded-lg bg-white shadow-sm ring-1 ring-slate-200 mb-6">
@@ -23,16 +79,8 @@
                         <div>
                             <p class="text-sm font-medium text-gray-500">Status</p>
                             <p class="mt-1">
-                                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset
-                                    @if($loanReturn->status === 'pending')
-                                        bg-yellow-100 text-yellow-800 ring-yellow-600
-                                    @elseif($loanReturn->status === 'completed')
-                                        bg-green-100 text-green-800 ring-green-600
-                                    @else
-                                        bg-gray-100 text-gray-700 ring-gray-600
-                                    @endif
-                                ">
-                                    {{ ucfirst($loanReturn->status) }}
+                                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset {{ $returnStatusBadges[$loanReturn->status] ?? 'bg-gray-100 text-gray-700 ring-gray-600' }}">
+                                    {{ $returnStatusLabels[$loanReturn->status] ?? ucfirst($loanReturn->status) }}
                                 </span>
                             </p>
                         </div>
@@ -99,16 +147,8 @@
                                     <td class="px-6 py-4 text-gray-600">{{ $item->item->category->name ?? '-' }}</td>
                                     <td class="px-6 py-4 text-gray-600">{{ $item->quantity }}</td>
                                     <td class="px-6 py-4">
-                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium 
-                                            @if($item->condition === 'baik')
-                                                bg-green-100 text-green-800
-                                            @elseif($item->condition === 'rusak ringan')
-                                                bg-yellow-100 text-yellow-800
-                                            @else
-                                                bg-red-100 text-red-800
-                                            @endif
-                                        ">
-                                            {{ ucfirst($item->condition) }}
+                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium {{ $itemConditionBadges[$item->item->condition] ?? 'bg-gray-100 text-gray-700' }}">
+                                            {{ $itemConditionLabels[$item->item->condition] ?? ucfirst($item->item->condition) }}
                                         </span>
                                     </td>
                                 </tr>

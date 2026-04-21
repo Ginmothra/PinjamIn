@@ -90,6 +90,9 @@ Route::middleware(['auth', 'verified', 'role:worker'])->prefix('worker')->name('
 
     Route::get('/pengembalian', [WorkerReturnsController::class, 'index'])->name('returns.index');
     Route::get('/pengembalian/{loanReturn}', [WorkerReturnsController::class, 'show'])->name('returns.show');
+    Route::post('/pengembalian/{loanReturn}/accept', [WorkerReturnsController::class, 'accept'])->name('returns.accept');
+    Route::post('/pengembalian/{loanReturn}/reject', [WorkerReturnsController::class, 'reject'])->name('returns.reject');
+    Route::post('/pengembalian/{loanReturn}/damaged', [WorkerReturnsController::class, 'markDamaged'])->name('returns.damaged');
 });
 
 require __DIR__.'/auth.php';

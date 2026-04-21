@@ -42,4 +42,9 @@ class Loan extends Model
     {
         return $this->hasMany(\App\Models\LoanReturn::class, 'loan_id');
     }
+
+    public function loanReturns(): HasMany
+    {
+        return $this->returns();
+    }
 }

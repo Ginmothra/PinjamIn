@@ -26,6 +26,30 @@
                     'returned' => 'bg-sky-600 text-white ring-sky-600',
                     'completed' => 'bg-emerald-600 text-white ring-emerald-600',
                 ];
+
+                $itemConditionBadges = [
+                    'good' => 'bg-green-100 text-green-800',
+                    'maintenance' => 'bg-yellow-100 text-yellow-800',
+                    'damaged' => 'bg-red-100 text-red-800',
+                ];
+
+                $itemConditionLabels = [
+                    'good' => 'Baik',
+                    'maintenance' => 'Perbaikan',
+                    'damaged' => 'Rusak',
+                ];
+
+                $returnStatusBadges = [
+                    'partial' => 'bg-yellow-100 text-yellow-800',
+                    'completed' => 'bg-green-100 text-green-800',
+                    'rejected' => 'bg-red-100 text-red-800',
+                ];
+
+                $returnStatusLabels = [
+                    'partial' => 'Pending',
+                    'completed' => 'Selesai',
+                    'rejected' => 'Ditolak',
+                ];
             @endphp
 
             <!-- Info Card -->
@@ -107,16 +131,8 @@
                                     <td class="px-6 py-4 text-gray-600">{{ $item->item->category->name ?? '-' }}</td>
                                     <td class="px-6 py-4 text-gray-600">{{ $item->quantity }}</td>
                                     <td class="px-6 py-4">
-                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium 
-                                            @if($item->condition === 'baik')
-                                                bg-green-100 text-green-800
-                                            @elseif($item->condition === 'rusak ringan')
-                                                bg-yellow-100 text-yellow-800
-                                            @else
-                                                bg-red-100 text-red-800
-                                            @endif
-                                        ">
-                                            {{ ucfirst($item->condition) }}
+                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium {{ $itemConditionBadges[$item->item->condition] ?? 'bg-gray-100 text-gray-700' }}">
+                                            {{ $itemConditionLabels[$item->item->condition] ?? ucfirst($item->item->condition) }}
                                         </span>
                                     </td>
                                 </tr>
@@ -146,14 +162,8 @@
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-6 py-4 text-gray-900">{{ $return->return_date->format('d M Y H:i') }}</td>
                                         <td class="px-6 py-4">
-                                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium
-                                                @if($return->status === 'completed')
-                                                    bg-green-100 text-green-800
-                                                @else
-                                                    bg-yellow-100 text-yellow-800
-                                                @endif
-                                            ">
-                                                {{ ucfirst($return->status) }}
+                                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium {{ $returnStatusBadges[$return->status] ?? 'bg-gray-100 text-gray-700' }}">
+                                                {{ $returnStatusLabels[$return->status] ?? ucfirst($return->status) }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 text-gray-600">{{ $return->notes ?? '-' }}</td>
