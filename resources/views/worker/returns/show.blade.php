@@ -115,6 +115,16 @@
                         </div>
                     </div>
 
+                    <!-- Proof Image -->
+                    @if($loanReturn->proof_image)
+                        <div class="mt-6 border-t border-gray-200 pt-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-3">Foto Bukti Pengembalian</h3>
+                            <div class="max-w-md overflow-hidden rounded-xl border border-slate-200">
+                                <img src="{{ $loanReturn->proof_image }}" alt="Bukti Foto" class="h-auto w-full object-contain">
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Notes -->
                     @if($loanReturn->notes)
                         <div class="mt-6 border-t border-gray-200 pt-6">
