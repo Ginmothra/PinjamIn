@@ -14,25 +14,30 @@ use Illuminate\Support\Str;
 class LoanController extends Controller
 {
     /**
-     * Submit peminjaman baru (dari keranjang).
+     * Submit peminjaman baru (dari keranjang mobile).
      * POST /api/loans
      */
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'items' => ['required', 'array', 'min:1'],
+            'items'    => ['required', 'array', 'min:1'],
             'items.*.id' => ['required', 'exists:items,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
-            'notes' => ['nullable', 'string'],
+            'due_date' => ['required', 'date', 'after_or_equal:today'],
+            'notes'    => ['nullable', 'string'],
+        ], [
+            'due_date.after_or_equal' => 'Tanggal pengembalian tidak boleh sebelum hari ini.'
         ]);
 
         try {
             return DB::transaction(function() use ($request) {
                 // 1. Buat Header Peminjaman
+                // Penyesuaian: user_id auto dari login, status fix pending, loan_date fix today.
                 $loan = Loan::create([
                     'loan_code' => 'L-' . strtoupper(Str::random(8)),
-                    'user_id'   => $request->user()->id,
-                    'loan_date' => now(),
+                    'user_id'   => $request->user()->id, 
+                    'loan_date' => now()->toDateString(),
+                    'due_date'  => $request->due_date,
                     'status'    => 'pending',
                     'notes'     => $request->notes,
                 ]);
@@ -41,7 +46,7 @@ class LoanController extends Controller
                 foreach ($request->items as $cartItem) {
                     $item = Item::find($cartItem['id']);
 
-                    // Validasi stok
+                    // Validasi stok (Safety check)
                     if ($item->stock < $cartItem['quantity']) {
                         throw new \Exception("Stok alat {$item->name} tidak mencukupi.");
                     }
@@ -51,14 +56,10 @@ class LoanController extends Controller
                         'item_id'  => $item->id,
                         'quantity' => $cartItem['quantity'],
                     ]);
-
-                    // Kurangi stok (opsional tergantung kebijakan bisnis, biasanya saat approved baru kurangi)
-                    // Tapi di sini kita kurangi langsung agar tidak double booking jika sistemnya real-time
-                    // $item->decrement('stock', $cartItem['quantity']);
                 }
 
                 return response()->json([
-                    'message' => 'Peminjaman berhasil diajukan. Menunggu persetujuan petugas.',
+                    'message' => 'Peminjaman berhasil diajukan! Tunggu persetujuan petugas.',
                     'loan'    => $loan->load('loanItems.item'),
                 ], 201);
             });
@@ -70,8 +71,7 @@ class LoanController extends Controller
     }
 
     /**
-     * Ambil riwayat peminjaman user saat ini.
-     * GET /api/loans
+     * Ambil riwayat peminjaman user.
      */
     public function index(Request $request): JsonResponse
     {
