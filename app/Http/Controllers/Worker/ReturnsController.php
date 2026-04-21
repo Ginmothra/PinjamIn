@@ -118,15 +118,57 @@ class ReturnsController extends Controller
             ->with('status', 'Pengembalian ditandai sebagai ditolak.');
     }
 
-    public function markDamaged(LoanReturn $loanReturn): RedirectResponse
+    public function damagedForm(LoanReturn $loanReturn): View
+    {
+        if ($loanReturn->status !== 'partial') {
+            abort(404);
+        }
+
+        return view('worker.returns.damaged', [
+            'return' => $loanReturn->load('loan.user', 'loan.loanItems.item'),
+        ]);
+    }
+
+    public function markDamaged(Request $request, LoanReturn $loanReturn): RedirectResponse
     {
         if ($loanReturn->status !== 'partial') {
             return redirect()->route('worker.returns.index')
                 ->with('status', 'Pengembalian ini sudah diproses sebelumnya.');
         }
 
-        return redirect()->route('worker.returns.show', $loanReturn)
-            ->with('status', 'Placeholder: alur barang rusak akan diproses oleh role Technician (belum tersedia).');
+        $validated = $request->validate([
+            'description' => ['required', 'string', 'max:1000'],
+        ]);
+
+        DB::transaction(function () use ($loanReturn, $validated): void {
+            // 1. Update status return jadi completed (pengembalian selesai walau barang rusak)
+            $loanReturn->update([
+                'status' => 'completed',
+                'notes' => $this->appendSystemNote(
+                    $loanReturn->notes,
+                    'Pengembalian selesai dengan kondisi barang rusak: ' . $validated['description']
+                ),
+            ]);
+
+            // 2. Update status loan jadi completed (karena barang sudah balik walau rusak)
+            $loanReturn->loan->update(['status' => 'completed']);
+
+            // 3. Update condition barang jadi damaged & buat repair record
+            foreach ($loanReturn->loan->loanItems as $loanItem) {
+                $item = $loanItem->item;
+                $item->update(['condition' => 'damaged']);
+
+                \App\Models\Repair::create([
+                    'item_id' => $item->id,
+                    'loan_return_id' => $loanReturn->id,
+                    'description' => $validated['description'],
+                    'status' => 'pending',
+                ]);
+            }
+        });
+
+        return redirect()->route('worker.returns.index')
+            ->with('status', 'Laporan kerusakan berhasil dikirim ke Teknisi.');
     }
 
     private function appendSystemNote(?string $currentNotes, string $note): string

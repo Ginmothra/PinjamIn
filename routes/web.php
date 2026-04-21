@@ -27,6 +27,10 @@ Route::get('/', function () {
         return redirect()->route('worker.dashboard');
     }
 
+    if (auth()->user()->hasRole('technician')) {
+        return redirect()->route('technician.dashboard');
+    }
+
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -97,8 +101,17 @@ Route::middleware(['auth', 'verified', 'role:worker'])->prefix('worker')->name('
     Route::get('/pengembalian/{loanReturn}', [WorkerReturnsController::class, 'show'])->name('returns.show');
     Route::post('/pengembalian/{loanReturn}/accept', [WorkerReturnsController::class, 'accept'])->name('returns.accept');
     Route::post('/pengembalian/{loanReturn}/reject', [WorkerReturnsController::class, 'reject'])->name('returns.reject');
-    Route::post('/pengembalian/{loanReturn}/damaged', [WorkerReturnsController::class, 'markDamaged'])->name('returns.damaged');
+    Route::get('/pengembalian/{loanReturn}/damaged', [WorkerReturnsController::class, 'damagedForm'])->name('returns.damaged');
+    Route::post('/pengembalian/{loanReturn}/damaged', [WorkerReturnsController::class, 'markDamaged'])->name('returns.mark-damaged');
     Route::post('/reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
+});
+
+Route::middleware(['auth', 'verified', 'role:technician'])->prefix('technician')->name('technician.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Technician\RepairController::class, 'index'])->name('dashboard');
+    Route::get('/repairs/history', [\App\Http\Controllers\Technician\RepairController::class, 'history'])->name('repairs.history');
+    Route::post('/repairs/{repair}/start', [\App\Http\Controllers\Technician\RepairController::class, 'startRepair'])->name('repairs.start');
+    Route::post('/repairs/{repair}/update', [\App\Http\Controllers\Technician\RepairController::class, 'updateProgress'])->name('repairs.update');
+    Route::post('/repairs/{repair}/complete', [\App\Http\Controllers\Technician\RepairController::class, 'completeRepair'])->name('repairs.complete');
 });
 
 require __DIR__.'/auth.php';

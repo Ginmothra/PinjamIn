@@ -49,6 +49,14 @@
                         <x-nav-link :href="route('worker.returns.index')" :active="request()->routeIs('worker.returns.*')">
                             Pengembalian
                         </x-nav-link>
+                    @elserole('technician')
+                        <x-nav-link :href="route('technician.dashboard')" :active="request()->routeIs('technician.dashboard')">
+                            Dashboard
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('technician.repairs.history')" :active="request()->routeIs('technician.repairs.history')">
+                            Riwayat Perbaikan
+                        </x-nav-link>
                     @else
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                             Dashboard
@@ -137,6 +145,13 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('worker.returns.index')" :active="request()->routeIs('worker.returns.*')">
                     Pengembalian
+                </x-responsive-nav-link>
+            @elserole('technician')
+                <x-responsive-nav-link :href="route('technician.dashboard')" :active="request()->routeIs('technician.dashboard')">
+                    Dashboard
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('technician.repairs.history')" :active="request()->routeIs('technician.repairs.history')">
+                    Riwayat Perbaikan
                 </x-responsive-nav-link>
             @else
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">

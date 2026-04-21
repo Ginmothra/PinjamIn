@@ -22,4 +22,9 @@ class Item extends Model
     {
         return $this->hasMany(\App\Models\LoanItem::class);
     }
+
+    public function repairs(): HasMany
+    {
+        return $this->hasMany(Repair::class);
+    }
 }

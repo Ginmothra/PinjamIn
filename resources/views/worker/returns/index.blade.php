@@ -90,12 +90,9 @@
                                                 </button>
                                             </form>
 
-                                            <form method="POST" action="{{ route('worker.returns.damaged', $return) }}">
-                                                @csrf
-                                                <button type="submit" class="inline-flex items-center rounded-md bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600">
-                                                    Rusak
-                                                </button>
-                                            </form>
+                                            <a href="{{ route('worker.returns.damaged', $return) }}" class="inline-flex items-center rounded-md bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600">
+                                                Rusak
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
