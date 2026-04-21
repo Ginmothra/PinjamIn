@@ -30,14 +30,17 @@ return new class extends Migration
         DB::unprepared("
             CREATE PROCEDURE sp_approve_peminjaman(IN l_id INT, IN w_id INT)
             BEGIN
-                -- Update Loan Status
-                UPDATE loans 
-                SET status = 'borrowed', 
-                    approved_by = w_id, 
-                    approved_at = NOW() 
-                WHERE id = l_id;
+                DECLARE v_loan_date DATE;
+                SELECT loan_date INTO v_loan_date FROM loans WHERE id = l_id;
 
-                -- Update Item Stock (Reduce)
+                -- Tentukan status berdasarkan tanggal (Booked jika besok, Borrowed jika hari ini)
+                IF v_loan_date > CURDATE() THEN
+                    UPDATE loans SET status = 'booked', approved_by = w_id, approved_at = NOW() WHERE id = l_id;
+                ELSE
+                    UPDATE loans SET status = 'borrowed', approved_by = w_id, approved_at = NOW() WHERE id = l_id;
+                END IF;
+
+                -- Selalu potong stok barang saat pertama kali di-approve
                 UPDATE items i
                 JOIN loan_items li ON i.id = li.item_id
                 SET i.stock = i.stock - li.quantity

@@ -40,7 +40,7 @@ class LoanController extends Controller
                 'user_id'   => $request->user()->id, 
                 'loan_date' => $isBooking ? now()->addDay()->toDateString() : now()->toDateString(),
                 'due_date'  => $request->due_date,
-                'status'    => $isBooking ? 'booked' : 'pending',
+                'status'    => 'pending',
                 'notes'     => $request->notes,
             ]);
 

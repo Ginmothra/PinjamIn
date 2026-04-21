@@ -58,11 +58,19 @@ class LoansController extends Controller
                 ->with('status', 'Peminjaman ini sudah diproses.');
         }
 
-        $message = $loan->status === 'booked' ? 'Barang booking berhasil diserahkan.' : 'Peminjaman berhasil di-approve.';
-
         try {
-            // Menggunakan Stored Procedure untuk approve peminjaman
-            DB::statement("CALL sp_approve_peminjaman(?, ?)", [$loan->id, $request->user()->id]);
+            // Jika masih pending (Baru masuk), panggil Stored Procedure
+            // SP ini otomatis potong stok & tentukan status (booked/borrowed)
+            if ($loan->status === 'pending') {
+                DB::statement("CALL sp_approve_peminjaman(?, ?)", [$loan->id, $request->user()->id]);
+                $loan->refresh();
+                $message = $loan->status === 'booked' ? 'Booking dikonfirmasi & stok barang telah diamankan.' : 'Peminjaman berhasil di-approve.';
+            } else {
+                // Jika status sudah booked (User datang ambil barang di hari H)
+                // Cukup update status jadi borrowed (stok sudah dipotong saat booking konfirmasi)
+                $loan->update(['status' => 'borrowed']);
+                $message = 'Barang booking berhasil diserahkan.';
+            }
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal memproses peminjaman: ' . $e->getMessage());
         }
