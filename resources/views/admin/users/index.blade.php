@@ -39,7 +39,7 @@
                     'admin' => 'bg-emerald-600 text-white ring-emerald-600',
                     'worker' => 'bg-rose-600 text-white ring-rose-600',
                     'user' => 'bg-sky-600 text-white ring-sky-600',
-                    'technician' => 'bg-amber-500 text-slate-900 ring-amber-500',
+                    'technician' => 'bg-amber-500 text-white ring-amber-500',
                 ];
             @endphp
             <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">

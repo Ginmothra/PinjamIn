@@ -43,4 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Fines
     Route::get('fines', [\App\Http\Controllers\Api\FineController::class, 'index']);
+
+    // Profile Settings
+    Route::put('profile', [\App\Http\Controllers\Api\ProfileController::class, 'update']);
 });
