@@ -6,9 +6,6 @@
                     <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Riwayat Perbaikan</h1>
                     <p class="mt-2 text-slate-600 font-medium">Daftar barang yang telah Anda perbaiki.</p>
                 </div>
-                <a href="{{ route('technician.dashboard') }}" class="inline-flex items-center rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 transition-all">
-                    ← Kembali ke Dashboard
-                </a>
             </div>
 
             <div class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">

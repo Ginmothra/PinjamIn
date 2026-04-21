@@ -34,7 +34,7 @@ class ManagementPlaceholderController extends Controller
 
         return view('admin.management.activity-log', [
             'logs' => $logs,
-            'types' => ['USERS', 'ITEMS', 'LOANS', 'RETURNS'],
+            'types' => ['USERS', 'ITEMS', 'LOANS', 'RETURNS', 'REPAIRS', 'FINES'],
             'actions' => ['INSERT', 'UPDATE', 'DELETE', 'STATUS_CHANGE']
         ]);
     }

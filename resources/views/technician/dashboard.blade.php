@@ -6,11 +6,6 @@
                     <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Technician Dashboard</h1>
                     <p class="mt-2 text-slate-600 font-medium">Pantau dan kerjakan perbaikan barang yang rusak.</p>
                 </div>
-                <div class="flex gap-4">
-                    <a href="{{ route('technician.repairs.history') }}" class="inline-flex items-center rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 transition-all">
-                        📜 Riwayat Perbaikan
-                    </a>
-                </div>
             </div>
 
             @if(session('status'))

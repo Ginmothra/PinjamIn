@@ -59,6 +59,8 @@
                                                 {{ $log->log_type == 'ITEMS' ? 'bg-emerald-100 text-emerald-700' : '' }}
                                                 {{ $log->log_type == 'RETURNS' ? 'bg-amber-100 text-amber-700' : '' }}
                                                 {{ $log->log_type == 'USERS' ? 'bg-purple-100 text-purple-700' : '' }}
+                                                {{ $log->log_type == 'REPAIRS' ? 'bg-rose-100 text-rose-700' : '' }}
+                                                {{ $log->log_type == 'FINES' ? 'bg-indigo-100 text-indigo-700' : '' }}
                                             ">
                                                 {{ $log->log_type }}
                                             </span>
