@@ -222,6 +222,7 @@ class LoanManagementController extends Controller
         return [
             'pending' => 'Pending',
             'borrowed' => 'Dipinjam',
+            'rejected' => 'Ditolak',
             'returned' => 'Dikembalikan',
             'completed' => 'Selesai',
         ];
@@ -232,6 +233,7 @@ class LoanManagementController extends Controller
         return [
             'pending' => 'bg-orange-500 text-white ring-orange-500',
             'borrowed' => 'bg-rose-600 text-white ring-rose-600',
+            'rejected' => 'bg-red-600 text-white ring-red-600',
             'returned' => 'bg-sky-600 text-white ring-sky-600',
             'completed' => 'bg-emerald-600 text-white ring-emerald-600',
         ];

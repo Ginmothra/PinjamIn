@@ -19,7 +19,7 @@ class ReturnController extends Controller
         $loans = Loan::query()
             ->with(['loanItems.item'])
             ->where('user_id', $request->user()->id)
-            ->where('status', 'approved')
+            ->where('status', 'borrowed')
             ->latest()
             ->get();
 
@@ -60,7 +60,7 @@ class ReturnController extends Controller
                 $return = LoanReturn::create([
                     'loan_id'     => $loan->id,
                     'return_date' => now(),
-                    'status'      => 'pending',
+                    'status'      => 'partial',
                     'proof_image' => $proofImagePath ? '/storage/' . $proofImagePath : null,
                     'notes'       => $request->notes,
                 ]);

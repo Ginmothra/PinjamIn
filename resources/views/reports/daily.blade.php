@@ -128,7 +128,7 @@
                         </td>
                         <td>{{ $dmg->loan->user->name }}</td>
                         <td>{{ $dmg->return_date->format('d/m/Y') }}</td>
-                        <td>{{ $dmg->rejection_note ?? 'Terdeteksi kerusakan saat pengembalian' }}</td>
+                        <td>{{ $dmg->notes ?? 'Terdeteksi kerusakan saat pengembalian' }}</td>
                     </tr>
                 @endforeach
             </tbody>
