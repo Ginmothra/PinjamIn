@@ -83,7 +83,8 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
-        $unpaidSum = $user->fines()->where('status', 'unpaid')->sum('amount');
+        
+        $unpaidSum = DB::selectOne("SELECT fn_total_denda_user(?) as total", [$user->id])->total;
 
         return response()->json([
             'user' => [

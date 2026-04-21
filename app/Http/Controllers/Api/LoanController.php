@@ -32,41 +32,43 @@ class LoanController extends Controller
 
         $isBooking = $request->type === 'booking';
 
+        DB::beginTransaction();
         try {
-            return DB::transaction(function() use ($request, $isBooking) {
-                // 1. Buat Header Peminjaman
-                // Penyesuaian: user_id auto dari login, status fix pending, loan_date fix today.
-                $loan = Loan::create([
-                    'loan_code' => 'L-' . strtoupper(Str::random(8)),
-                    'user_id'   => $request->user()->id, 
-                    'loan_date' => $isBooking ? now()->addDay()->toDateString() : now()->toDateString(),
-                    'due_date'  => $request->due_date,
-                    'status'    => $isBooking ? 'booked' : 'pending',
-                    'notes'     => $request->notes,
-                ]);
+            // 1. Buat Header Peminjaman
+            $loan = Loan::create([
+                'loan_code' => 'L-' . strtoupper(Str::random(8)),
+                'user_id'   => $request->user()->id, 
+                'loan_date' => $isBooking ? now()->addDay()->toDateString() : now()->toDateString(),
+                'due_date'  => $request->due_date,
+                'status'    => $isBooking ? 'booked' : 'pending',
+                'notes'     => $request->notes,
+            ]);
 
-                // 2. Simpan Item Detail
-                foreach ($request->items as $cartItem) {
-                    $item = Item::find($cartItem['id']);
+            // 2. Simpan Item Detail
+            foreach ($request->items as $cartItem) {
+                $item = Item::findOrFail($cartItem['id']);
 
-                    // Validasi stok (Safety check)
-                    if ($item->stock < $cartItem['quantity']) {
-                        throw new \Exception("Stok alat {$item->name} tidak mencukupi.");
-                    }
-
-                    LoanItem::create([
-                        'loan_id'  => $loan->id,
-                        'item_id'  => $item->id,
-                        'quantity' => $cartItem['quantity'],
-                    ]);
+                // Validasi stok (Safety check)
+                if ($item->stock < $cartItem['quantity']) {
+                    throw new \Exception("Stok alat {$item->name} tidak mencukupi.");
                 }
 
-                return response()->json([
-                    'message' => 'Peminjaman berhasil diajukan! Tunggu persetujuan petugas.',
-                    'loan'    => $loan->load('loanItems.item'),
-                ], 201);
-            });
+                LoanItem::create([
+                    'loan_id'  => $loan->id,
+                    'item_id'  => $item->id,
+                    'quantity' => $cartItem['quantity'],
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => $isBooking ? 'Booking berhasil diajukan!' : 'Peminjaman berhasil diajukan! Tunggu persetujuan petugas.',
+                'loan'    => $loan->load('loanItems.item'),
+            ], 201);
+
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'message' => $e->getMessage()
             ], 422);

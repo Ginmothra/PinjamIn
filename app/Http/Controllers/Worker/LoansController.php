@@ -60,16 +60,12 @@ class LoansController extends Controller
 
         $message = $loan->status === 'booked' ? 'Barang booking berhasil diserahkan.' : 'Peminjaman berhasil di-approve.';
 
-        DB::transaction(function () use ($loan, $request): void {
-            $loan->update([
-                'status' => 'borrowed',
-                'approved_by' => (int) $request->user()->id,
-                'approved_at' => now(),
-                'reject_reason' => null,
-                'rejected_by' => null,
-                'rejected_at' => null,
-            ]);
-        });
+        try {
+            // Menggunakan Stored Procedure untuk approve peminjaman
+            DB::statement("CALL sp_approve_peminjaman(?, ?)", [$loan->id, $request->user()->id]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memproses peminjaman: ' . $e->getMessage());
+        }
 
         return redirect()->route('worker.loans.index', ['tab' => $request->query('tab', 'antrean')])
             ->with('status', $message);
@@ -97,7 +93,8 @@ class LoansController extends Controller
             'reject_reason' => ['required', 'string', 'max:1000'],
         ]);
 
-        DB::transaction(function () use ($loan, $request, $validated): void {
+        DB::beginTransaction();
+        try {
             $loan->update([
                 'status' => 'rejected',
                 'reject_reason' => $validated['reject_reason'],
@@ -106,7 +103,11 @@ class LoansController extends Controller
                 'approved_by' => null,
                 'approved_at' => null,
             ]);
-        });
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menolak peminjaman.');
+        }
 
         return redirect()->route('worker.loans.index', ['tab' => $request->query('tab', 'antrean')])
             ->with('status', 'Peminjaman berhasil ditolak.');
