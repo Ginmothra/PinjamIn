@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         if (DB::getDriverName() === 'mysql') {
-            DB::statement("ALTER TABLE loans MODIFY COLUMN status ENUM('pending', 'approved', 'borrowed', 'returned', 'completed', 'rejected', 'cancelled') NOT NULL DEFAULT 'pending'");
+            DB::statement("ALTER TABLE loans MODIFY COLUMN status ENUM('pending', 'booked', 'approved', 'borrowed', 'returned', 'completed', 'rejected', 'cancelled') NOT NULL DEFAULT 'pending'");
         }
     }
 

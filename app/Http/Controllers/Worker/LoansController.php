@@ -15,14 +15,20 @@ class LoansController extends Controller
     {
         $filters = [
             'q' => trim((string) $request->query('q', '')),
+            'tab' => $request->query('tab', 'antrean'), // Default tab is antrean (pending)
         ];
 
         $query = Loan::query()
             ->with(['user:id,name,email,kelas', 'loanItems.item:id,category_id,code,name'])
-            ->withCount('loanItems')
-            ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
-            ;
+            ->withCount('loanItems');
+
+        if ($filters['tab'] === 'booking') {
+            $query->where('status', 'booked');
+        } else {
+            $query->where('status', 'pending');
+        }
+
+        $query->orderBy('created_at', 'desc');
 
         if ($filters['q'] !== '') {
             $search = $filters['q'];
@@ -47,10 +53,12 @@ class LoansController extends Controller
 
     public function approve(Request $request, Loan $loan): RedirectResponse
     {
-        if ($loan->status !== 'pending') {
+        if ($loan->status !== 'pending' && $loan->status !== 'booked') {
             return redirect()->route('worker.loans.index')
                 ->with('status', 'Peminjaman ini sudah diproses.');
         }
+
+        $message = $loan->status === 'booked' ? 'Barang booking berhasil diserahkan.' : 'Peminjaman berhasil di-approve.';
 
         DB::transaction(function () use ($loan, $request): void {
             $loan->update([
@@ -63,13 +71,13 @@ class LoansController extends Controller
             ]);
         });
 
-        return redirect()->route('worker.loans.index')
-            ->with('status', 'Peminjaman berhasil di-approve.');
+        return redirect()->route('worker.loans.index', ['tab' => $request->query('tab', 'antrean')])
+            ->with('status', $message);
     }
 
     public function rejectForm(Loan $loan): View
     {
-        if ($loan->status !== 'pending') {
+        if ($loan->status !== 'pending' && $loan->status !== 'booked') {
             abort(404);
         }
 
@@ -80,7 +88,7 @@ class LoansController extends Controller
 
     public function reject(Request $request, Loan $loan): RedirectResponse
     {
-        if ($loan->status !== 'pending') {
+        if ($loan->status !== 'pending' && $loan->status !== 'booked') {
             return redirect()->route('worker.loans.index')
                 ->with('status', 'Peminjaman ini sudah diproses.');
         }
@@ -100,7 +108,7 @@ class LoansController extends Controller
             ]);
         });
 
-        return redirect()->route('worker.loans.index')
+        return redirect()->route('worker.loans.index', ['tab' => $request->query('tab', 'antrean')])
             ->with('status', 'Peminjaman berhasil ditolak.');
     }
 }

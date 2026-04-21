@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->date('loan_date');
             $table->date('due_date');
-            $table->enum('status', ['pending', 'approved', 'borrowed', 'returned', 'rejected', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'booked', 'approved', 'borrowed', 'returned', 'rejected', 'cancelled'])->default('pending');
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
             $table->text('notes')->nullable();

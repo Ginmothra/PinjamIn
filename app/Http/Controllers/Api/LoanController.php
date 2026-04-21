@@ -25,20 +25,23 @@ class LoanController extends Controller
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'due_date' => ['required', 'date', 'after_or_equal:today'],
             'notes'    => ['nullable', 'string'],
+            'type'     => ['nullable', 'string', 'in:loan,booking'],
         ], [
             'due_date.after_or_equal' => 'Tanggal pengembalian tidak boleh sebelum hari ini.'
         ]);
 
+        $isBooking = $request->type === 'booking';
+
         try {
-            return DB::transaction(function() use ($request) {
+            return DB::transaction(function() use ($request, $isBooking) {
                 // 1. Buat Header Peminjaman
                 // Penyesuaian: user_id auto dari login, status fix pending, loan_date fix today.
                 $loan = Loan::create([
                     'loan_code' => 'L-' . strtoupper(Str::random(8)),
                     'user_id'   => $request->user()->id, 
-                    'loan_date' => now()->toDateString(),
+                    'loan_date' => $isBooking ? now()->addDay()->toDateString() : now()->toDateString(),
                     'due_date'  => $request->due_date,
-                    'status'    => 'pending',
+                    'status'    => $isBooking ? 'booked' : 'pending',
                     'notes'     => $request->notes,
                 ]);
 

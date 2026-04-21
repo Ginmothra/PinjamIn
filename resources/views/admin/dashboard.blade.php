@@ -38,7 +38,6 @@
 
             <div class="bg-white shadow-sm rounded-lg p-5">
                 <h3 class="text-lg font-semibold text-gray-900">Ringkasan Status Peminjaman</h3>
-                <p class="mt-1 text-sm text-gray-600">Grafik Larapex</p>
 
                 <div class="mt-4 divide-y divide-gray-100">
                     @forelse ($loanStatusCounts as $status => $total)

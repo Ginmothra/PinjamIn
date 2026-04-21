@@ -46,5 +46,14 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $worker->assignRole('worker');
+
+        $user = User::factory()->create([
+            'name' => 'user',
+            'email' => 'user@test.com',
+            'password' => Hash::make('password'),
+            'is_active' => true,
+        ]);
+
+        $user->assignRole('user');
     }
 }
