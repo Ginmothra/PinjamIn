@@ -12,6 +12,7 @@ use App\Http\Controllers\Worker\LoansController as WorkerLoansController;
 use App\Http\Controllers\Worker\ReturnsController as WorkerReturnsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\AccountActivationController;
+use App\Http\Controllers\Worker\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/activate-account', [AccountActivationController::class, 'show'])->name('activate-account');
@@ -97,6 +98,7 @@ Route::middleware(['auth', 'verified', 'role:worker'])->prefix('worker')->name('
     Route::post('/pengembalian/{loanReturn}/accept', [WorkerReturnsController::class, 'accept'])->name('returns.accept');
     Route::post('/pengembalian/{loanReturn}/reject', [WorkerReturnsController::class, 'reject'])->name('returns.reject');
     Route::post('/pengembalian/{loanReturn}/damaged', [WorkerReturnsController::class, 'markDamaged'])->name('returns.damaged');
+    Route::post('/reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
 });
 
 require __DIR__.'/auth.php';

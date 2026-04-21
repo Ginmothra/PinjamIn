@@ -119,7 +119,7 @@
                 </div>
 
                 <!-- Laporan -->
-                <div class="overflow-hidden rounded-lg bg-white shadow hover:shadow-md transition-shadow">
+                <div class="overflow-hidden rounded-lg bg-white shadow hover:shadow-md transition-shadow" x-data="{ open: false }">
                     <div class="px-6 py-8">
                         <div class="mb-4 rounded-lg bg-purple-100 w-12 h-12 flex items-center justify-center">
                             <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,12 +128,49 @@
                         </div>
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Laporan</h3>
                         <p class="text-sm text-gray-600 mb-4">Cetak dan unduh laporan harian peminjaman</p>
-                        <button class="inline-flex items-center px-4 py-2 rounded-md bg-purple-600 text-white hover:bg-purple-700 transition-colors" disabled>
-                            Cetak
+                        <button @click="open = true" class="inline-flex items-center px-4 py-2 rounded-md bg-purple-600 text-white hover:bg-purple-700 transition-colors">
+                            Cetak Laporan
                             <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                         </button>
+                    </div>
+
+                    <!-- Modal Laporan -->
+                    <div x-show="open" 
+                         class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto" 
+                         x-cloak>
+                        <div class="fixed inset-0 bg-black opacity-50"></div>
+                        <div class="relative bg-white rounded-xl shadow-2xl p-8 max-w-md w-full m-4" @click.away="open = false">
+                            <h2 class="text-xl font-bold text-gray-900 mb-4">Pilih Rentang Laporan</h2>
+                            
+                            <form action="{{ route('worker.reports.generate') }}" method="POST">
+                                @csrf
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Tanggal Mulai</label>
+                                        <input type="date" name="start_date" required value="{{ date('Y-m-d') }}"
+                                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Tanggal Akhir</label>
+                                        <input type="date" name="end_date" required value="{{ date('Y-m-d') }}"
+                                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                    </div>
+                                </div>
+
+                                <div class="mt-8 flex justify-end gap-3">
+                                    <button type="button" @click="open = false" 
+                                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                                        Batal
+                                    </button>
+                                    <button type="submit" 
+                                            class="px-4 py-2 text-sm font-semibold text-white bg-purple-600 rounded-md hover:bg-purple-700">
+                                        Download PDF
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
