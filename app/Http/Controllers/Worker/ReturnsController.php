@@ -64,30 +64,42 @@ class ReturnsController extends Controller
                 ->with('status', 'Pengembalian ini sudah diproses sebelumnya.');
         }
 
-        DB::transaction(function () use ($request, $loanReturn): void {
+        DB::beginTransaction();
+        try {
             /** @var Loan $loan */
             $loan = $loanReturn->loan()->lockForUpdate()->firstOrFail();
 
+            // Memanggil Stored Procedure untuk Selesaikan Pengembalian & Restock
+            DB::statement("CALL sp_selesaikan_pengembalian(?, ?, ?)", [
+                $loan->id,
+                $loanReturn->id,
+                (int) $request->user()->id
+            ]);
+
+            // Tambahkan sistem note secara manual di PHP karena SP cuma urusin data inti
+            $loanReturn->refresh();
             $loanReturn->update([
-                'status' => 'completed',
-                'user_id' => (int) $request->user()->id,
                 'notes' => $this->appendSystemNote(
                     $loanReturn->notes,
                     'Pengembalian diterima oleh petugas pada ' . now()->format('d-m-Y H:i') . '.'
                 ),
             ]);
 
+            // Hapus pengajuan return lain yang menggantung buat loan ini
             $loan->returns()
                 ->where('status', 'partial')
                 ->where('id', '!=', $loanReturn->id)
                 ->delete();
 
-            $loan->update(['status' => 'completed']);
             $loan->loanItems()->update(['returned_quantity' => 1]);
-        });
 
-        return redirect()->route('worker.returns.index')
-            ->with('status', 'Pengembalian berhasil diterima.');
+            DB::commit();
+            return redirect()->route('worker.returns.index')
+                ->with('status', 'Pengembalian berhasil diterima.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memproses pengembalian: ' . $e->getMessage());
+        }
     }
 
     public function reject(Request $request, LoanReturn $loanReturn): RedirectResponse
@@ -97,7 +109,8 @@ class ReturnsController extends Controller
                 ->with('status', 'Pengembalian ini sudah diproses sebelumnya.');
         }
 
-        DB::transaction(function () use ($request, $loanReturn): void {
+        DB::beginTransaction();
+        try {
             /** @var Loan $loan */
             $loan = $loanReturn->loan()->lockForUpdate()->firstOrFail();
 
@@ -112,10 +125,14 @@ class ReturnsController extends Controller
 
             $loan->update(['status' => 'borrowed']);
             $loan->loanItems()->update(['returned_quantity' => 0]);
-        });
 
-        return redirect()->route('worker.returns.index')
-            ->with('status', 'Pengembalian ditandai sebagai ditolak.');
+            DB::commit();
+            return redirect()->route('worker.returns.index')
+                ->with('status', 'Pengembalian ditandai sebagai ditolak.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menolak pengembalian.');
+        }
     }
 
     public function damagedForm(LoanReturn $loanReturn): View
@@ -140,21 +157,29 @@ class ReturnsController extends Controller
             'description' => ['required', 'string', 'max:1000'],
         ]);
 
-        DB::transaction(function () use ($loanReturn, $validated): void {
-            // 1. Update status return jadi completed (pengembalian selesai walau barang rusak)
+        DB::beginTransaction();
+        try {
+            /** @var Loan $loan */
+            $loan = $loanReturn->loan()->lockForUpdate()->firstOrFail();
+
+            // Memanggil Stored Procedure untuk Selesaikan Pengembalian & Restock
+            DB::statement("CALL sp_selesaikan_pengembalian(?, ?, ?)", [
+                $loan->id,
+                $loanReturn->id,
+                (int) $request->user()->id
+            ]);
+
+            // Tambahkan catatan kerusakan di level PHP
+            $loanReturn->refresh();
             $loanReturn->update([
-                'status' => 'completed',
                 'notes' => $this->appendSystemNote(
                     $loanReturn->notes,
                     'Pengembalian selesai dengan kondisi barang rusak: ' . $validated['description']
                 ),
             ]);
 
-            // 2. Update status loan jadi completed (karena barang sudah balik walau rusak)
-            $loanReturn->loan->update(['status' => 'completed']);
-
-            // 3. Update condition barang jadi damaged & buat repair record
-            foreach ($loanReturn->loan->loanItems as $loanItem) {
+            // Update condition barang jadi damaged & buat repair record
+            foreach ($loan->loanItems as $loanItem) {
                 $item = $loanItem->item;
                 $item->update(['condition' => 'damaged']);
 
@@ -165,10 +190,14 @@ class ReturnsController extends Controller
                     'status' => 'pending',
                 ]);
             }
-        });
 
-        return redirect()->route('worker.returns.index')
-            ->with('status', 'Laporan kerusakan berhasil dikirim ke Teknisi.');
+            DB::commit();
+            return redirect()->route('worker.returns.index')
+                ->with('status', 'Laporan kerusakan berhasil dikirim ke Teknisi.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memproses kerusakan barang.');
+        }
     }
 
     private function appendSystemNote(?string $currentNotes, string $note): string

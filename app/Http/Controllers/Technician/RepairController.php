@@ -45,7 +45,8 @@ class RepairController extends Controller
             return redirect()->back()->with('error', 'Perbaikan sudah dimulai.');
         }
 
-        DB::transaction(function () use ($repair): void {
+        DB::beginTransaction();
+        try {
             $repair->update([
                 'status' => 'in_progress',
                 'technician_id' => auth()->id(),
@@ -53,9 +54,13 @@ class RepairController extends Controller
             ]);
 
             $repair->item->update(['condition' => 'maintenance']);
-        });
 
-        return redirect()->route('technician.dashboard')->with('status', 'Pengerjaan perbaikan dimulai.');
+            DB::commit();
+            return redirect()->route('technician.dashboard')->with('status', 'Pengerjaan perbaikan dimulai.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memulai perbaikan.');
+        }
     }
 
     public function updateProgress(Request $request, Repair $repair): RedirectResponse
@@ -77,7 +82,8 @@ class RepairController extends Controller
             return redirect()->back()->with('error', 'Perbaikan belum dimulai.');
         }
 
-        DB::transaction(function () use ($repair, $request): void {
+        DB::beginTransaction();
+        try {
             $repair->update([
                 'status' => 'completed',
                 'repair_notes' => $request->repair_notes ?? $repair->repair_notes,
@@ -85,8 +91,12 @@ class RepairController extends Controller
             ]);
 
             $repair->item->update(['condition' => 'good']);
-        });
 
-        return redirect()->route('technician.dashboard')->with('status', 'Barang berhasil diperbaiki dan siap digunakan kembali.');
+            DB::commit();
+            return redirect()->route('technician.dashboard')->with('status', 'Barang berhasil diperbaiki dan siap digunakan kembali.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menyelesaikan perbaikan.');
+        }
     }
 }

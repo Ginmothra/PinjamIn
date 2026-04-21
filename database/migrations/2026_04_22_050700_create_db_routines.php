@@ -44,6 +44,23 @@ return new class extends Migration
                 WHERE li.loan_id = l_id;
             END
         ");
+
+        // 3. Stored Procedure: Complete Return and Restock
+        DB::unprepared('DROP PROCEDURE IF EXISTS sp_selesaikan_pengembalian');
+        DB::unprepared("
+            CREATE PROCEDURE sp_selesaikan_pengembalian(IN l_id INT, IN r_id INT, IN w_id INT)
+            BEGIN
+                -- Update Loan & Return Status
+                UPDATE loans SET status = 'completed' WHERE id = l_id;
+                UPDATE loan_returns SET status = 'completed', user_id = w_id WHERE id = r_id;
+
+                -- Update Item Stock (Increase back)
+                UPDATE items i
+                JOIN loan_items li ON i.id = li.item_id
+                SET i.stock = i.stock + li.quantity
+                WHERE li.loan_id = l_id;
+            END
+        ");
     }
 
     /**
@@ -53,5 +70,6 @@ return new class extends Migration
     {
         DB::unprepared('DROP FUNCTION IF EXISTS fn_total_denda_user');
         DB::unprepared('DROP PROCEDURE IF EXISTS sp_approve_peminjaman');
+        DB::unprepared('DROP PROCEDURE IF EXISTS sp_selesaikan_pengembalian');
     }
 };
