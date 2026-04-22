@@ -19,6 +19,20 @@
                         <form method="POST" action="{{ route('admin.fines.store', $user) }}" class="space-y-4">
                             @csrf
                             <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Hubungkan ke Peminjaman</label>
+                                <select name="loan_id" class="w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="">-- Tanpa Peminjaman (Umum) --</option>
+                                    @foreach($loans as $loan)
+                                        <option value="{{ $loan->id }}">
+                                            {{ $loan->loan_code }} - {{ $loan->loan_date->format('d/m/Y') }} ({{ ucfirst($loan->status) }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('loan_id') <p class="mt-1 text-xs text-rose-600">{{ $message }}</p> @enderror
+                                <p class="mt-1 text-[10px] text-slate-400">Opsional: Pilih jika denda terkait transaksi tertentu.</p>
+                            </div>
+
+                            <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Jumlah (Rp)</label>
                                 <input type="number" name="amount" class="w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Contoh: 10000" required>
                                 @error('amount') <p class="mt-1 text-xs text-rose-600">{{ $message }}</p> @enderror
@@ -54,6 +68,12 @@
                                             @endif
                                         </div>
                                         <p class="text-sm text-slate-600 leading-relaxed font-medium">"{{ $fine->reason }}"</p>
+                                        @if($fine->loan)
+                                            <div class="mt-2 flex items-center gap-1">
+                                                <span class="text-[10px] font-bold text-slate-400">TERKAIT:</span>
+                                                <span class="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-mono font-bold text-slate-700">{{ $fine->loan->loan_code }}</span>
+                                            </div>
+                                        @endif
                                     </div>
                                     <div class="flex flex-col items-end gap-2">
                                         <form method="POST" action="{{ route('admin.fines.destroy', $fine) }}" onsubmit="return confirm('Hapus data denda ini?')">

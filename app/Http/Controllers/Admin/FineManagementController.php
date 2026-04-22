@@ -37,8 +37,11 @@ class FineManagementController extends Controller
     {
         $fines = $user->fines()->latest()->get();
         $unpaidSum = $user->fines()->where('status', 'unpaid')->sum('amount');
+        
+        // Ambil peminjaman user untuk dropdown, urutkan dari yang terbaru
+        $loans = $user->loans()->latest()->get();
 
-        return view('admin.fines.show', compact('user', 'fines', 'unpaidSum'));
+        return view('admin.fines.show', compact('user', 'fines', 'unpaidSum', 'loans'));
     }
 
     public function store(Request $request, User $user): RedirectResponse
