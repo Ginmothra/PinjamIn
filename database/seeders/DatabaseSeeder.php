@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
 
         $admin = User::factory()->create([
             'name' => 'admin',
-            'email' => 'admin@test',
+            'email' => 'admin@test.com',
             'password' => Hash::make('password'),
             'is_active' => true,
         ]);
@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
 
         $technician = User::factory()->create([
             'name' => 'technician',
-            'email' => 'tech@test',
+            'email' => 'tech@test.com',
             'password' => Hash::make('password'),
             'is_active' => true,
         ]);
@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
 
         $worker = User::factory()->create([
             'name' => 'worker',
-            'email' => 'worker@test',
+            'email' => 'worker@test.com',
             'password' => Hash::make('password'),
             'is_active' => true,
         ]);
