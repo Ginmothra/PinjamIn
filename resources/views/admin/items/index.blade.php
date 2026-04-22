@@ -91,7 +91,7 @@
                                 <tr class="item-row cursor-pointer hover:bg-sky-50/40" data-detail-url="{{ route('admin.items.show', $item) }}" tabindex="0" role="link" aria-label="Lihat detail barang {{ $item->name }}">
                                     <td class="px-5 py-4">
                                         @if ($item->image_path)
-                                            <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->name }}" class="h-14 w-14 rounded-lg object-cover ring-1 ring-slate-200" />
+                                            <img src="{{ Str::startsWith($item->image_path, ['http://', 'https://']) ? $item->image_path : asset('storage/' . $item->image_path) }}" alt="{{ $item->name }}" alt="{{ $item->name }}" class="h-14 w-14 rounded-lg object-cover ring-1 ring-slate-200" />
                                         @else
                                             <div class="flex h-14 w-14 items-center justify-center rounded-lg bg-slate-100 text-xs text-slate-400 ring-1 ring-slate-200">
                                                 Tidak ada

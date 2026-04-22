@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Item;
+use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -36,7 +37,9 @@ class ItemController extends Controller
                     'name'        => $item->name,
                     'description' => $item->description,
                     'stock'       => $item->stock,
-                    'image'       => $item->image_path ? asset('storage/' . $item->image_path) : null,
+                    'image'       => $item->image_path 
+                                        ? (Str::startsWith($item->image_path, ['http://', 'https://']) ? $item->image_path : asset('storage/' . $item->image_path)) 
+                                        : null,
                 ];
             })
         ]);
