@@ -63,19 +63,6 @@ class RepairController extends Controller
         }
     }
 
-    public function updateProgress(Request $request, Repair $repair): RedirectResponse
-    {
-        $validated = $request->validate([
-            'repair_notes' => ['required', 'string', 'max:1000'],
-        ]);
-
-        $repair->update([
-            'repair_notes' => $validated['repair_notes'],
-        ]);
-
-        return redirect()->route('technician.dashboard')->with('status', 'Progress perbaikan diperbarui.');
-    }
-
     public function completeRepair(Request $request, Repair $repair): RedirectResponse
     {
         if ($repair->status !== 'in_progress') {
@@ -86,8 +73,8 @@ class RepairController extends Controller
         try {
             $repair->update([
                 'status' => 'completed',
-                'repair_notes' => $request->repair_notes ?? $repair->repair_notes,
                 'completed_at' => now(),
+                'repair_notes' => 'Perbaikan selesai dikonfirmasi oleh Teknisi.',
             ]);
 
             $repair->item->update(['condition' => 'good']);
