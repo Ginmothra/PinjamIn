@@ -7,6 +7,7 @@ use App\Models\Loan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class LoansController extends Controller
@@ -23,9 +24,25 @@ class LoansController extends Controller
             ->withCount('loanItems');
 
         if ($filters['tab'] === 'booking') {
-            $query->where('status', 'booked');
+            // Booking: Semua yang tanggalnya di masa depan (baik pending maupun sudah booked)
+            $query->where(function ($q) {
+                $q->where('status', 'booked')
+                  ->orWhere(function ($sq) {
+                      $sq->where('status', 'pending')
+                         ->whereDate('loan_date', '>', now()->toDateString());
+                  });
+            });
         } else {
-            $query->where('status', 'pending');
+            // Antrean: Pending hari ini (atau lampau) + Booked yang harus diambil hari ini
+            $query->where(function ($q) {
+                $q->where(function ($sq) {
+                    $sq->where('status', 'pending')
+                       ->whereDate('loan_date', '<=', now()->toDateString());
+                })->orWhere(function ($sq) {
+                    $sq->where('status', 'booked')
+                       ->whereDate('loan_date', '<=', now()->toDateString());
+                });
+            });
         }
 
         $query->orderBy('created_at', 'desc');
@@ -35,6 +52,7 @@ class LoansController extends Controller
 
             $query->where(function ($builder) use ($search): void {
                 $builder->where('loan_code', 'like', '%' . $search . '%')
+                    ->orWhere('verification_code', 'like', '%' . $search . '%')
                     ->orWhereHas('user', function ($userQuery) use ($search): void {
                         $userQuery->where('name', 'like', '%' . $search . '%')
                             ->orWhere('email', 'like', '%' . $search . '%')
@@ -64,6 +82,12 @@ class LoansController extends Controller
             if ($loan->status === 'pending') {
                 DB::statement("CALL sp_approve_peminjaman(?, ?)", [$loan->id, $request->user()->id]);
                 $loan->refresh();
+
+                // Jika statusnya jadi booked atau borrowed, generate kode verifikasi
+                if (in_array($loan->status, ['booked', 'borrowed'])) {
+                    $loan->update(['verification_code' => strtoupper(Str::random(6))]);
+                }
+
                 $message = $loan->status === 'booked' ? 'Booking dikonfirmasi & stok barang telah diamankan.' : 'Peminjaman berhasil di-approve.';
             } else {
                 // Jika status sudah booked (User datang ambil barang di hari H)

@@ -32,6 +32,25 @@ class LoanController extends Controller
 
         $isBooking = $request->type === 'booking';
 
+        // 1. Validasi: User hanya boleh punya 1 peminjaman aktif
+        // Termasuk status 'returned' (sudah balikkan tapi belum diverifikasi petugas)
+        $activeLoan = Loan::where('user_id', $request->user()->id)
+            ->whereIn('status', ['pending', 'booked', 'borrowed', 'returned'])
+            ->first();
+
+        if ($activeLoan) {
+            $statusMsg = [
+                'pending' => 'peminjaman yang sedang menunggu persetujuan',
+                'booked' => 'booking barang yang belum diambil',
+                'borrowed' => 'barang yang belum dikembalikan',
+                'returned' => 'pengembalian yang sedang menunggu verifikasi petugas',
+            ];
+            
+            return response()->json([
+                'message' => "Gagal! Anda masih memiliki " . ($statusMsg[$activeLoan->status] ?? 'peminjaman aktif') . ". Tunggu sampai proses selesai."
+            ], 422);
+        }
+
         DB::beginTransaction();
         try {
             // 1. Buat Header Peminjaman
