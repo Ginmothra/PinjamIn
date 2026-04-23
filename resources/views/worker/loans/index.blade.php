@@ -44,10 +44,12 @@
             @php
                 $statusLabels = [
                     'pending' => 'Pending',
+                    'booked' => 'Booked',
                 ];
 
                 $statusBadges = [
                     'pending' => 'bg-orange-500 text-white ring-orange-500',
+                    'booked' => 'bg-indigo-600 text-white ring-indigo-600',
                 ];
             @endphp
 
@@ -57,6 +59,7 @@
                         <thead class="bg-slate-50 text-left text-slate-600">
                             <tr>
                                 <th class="px-5 py-3 font-semibold">Kode Peminjaman</th>
+                                <th class="px-5 py-3 font-semibold text-center">Booking Code</th>
                                 <th class="px-5 py-3 font-semibold">Peminjam</th>
                                 <th class="px-5 py-3 font-semibold">Tanggal</th>
                                 <th class="px-5 py-3 font-semibold">Jumlah Barang</th>
@@ -66,7 +69,19 @@
                         <tbody class="divide-y divide-gray-200">
                             @forelse($loans as $loan)
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-5 py-4 font-medium text-gray-900">{{ $loan->loan_code }}</td>
+                                    <td class="px-5 py-4 font-medium text-gray-900">
+                                        <div class="flex flex-col gap-1">
+                                            <span>{{ $loan->loan_code }}</span>
+                                            <span class="inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider {{ $statusBadges[$loan->status] ?? 'bg-gray-500 text-white' }}">
+                                                {{ $statusLabels[$loan->status] ?? $loan->status }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-4 text-center">
+                                        <span class="inline-flex items-center rounded-lg bg-indigo-50 px-3 py-1 text-sm font-mono font-black text-indigo-700 ring-1 ring-inset ring-indigo-700/10 uppercase tracking-widest">
+                                            {{ $loan->verification_code ?? '-' }}
+                                        </span>
+                                    </td>
                                     <td class="px-5 py-4">
                                         <div>
                                             <p class="font-medium text-gray-900">{{ $loan->user->name }}</p>
@@ -77,10 +92,18 @@
                                     <td class="px-5 py-4">{{ $loan->loan_items_count }} barang</td>
                                     <td class="px-5 py-4">
                                         <div class="flex flex-wrap gap-2">
-                                            <form method="POST" action="{{ route('worker.loans.approve', ['loan' => $loan, 'tab' => request('tab')]) }}" onsubmit="return confirm('{{ ($filters['tab'] ?? 'antrean') === 'booking' ? 'Serahkan barang booking ini?' : 'Approve peminjaman ini?' }}')">
+                                            <form method="POST" action="{{ route('worker.loans.approve', ['loan' => $loan, 'tab' => request('tab')]) }}" 
+                                                onsubmit="return confirm('{{ $loan->status === 'booked' ? 'Serahkan barang booking ini sekarang?' : 'Terima permintaan peminjaman ini?' }}')">
                                                 @csrf
                                                 <button type="submit" class="inline-flex items-center rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700">
-                                                    {{ ($filters['tab'] ?? 'antrean') === 'booking' ? 'Serahkan Barang' : 'Approve' }}
+                                                    @if($loan->status === 'booked')
+                                                        <svg class="mr-1.5 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                        </svg>
+                                                        Serahkan Barang
+                                                    @else
+                                                        Accept
+                                                    @endif
                                                 </button>
                                             </form>
                                             <a href="{{ route('worker.loans.reject-form', ['loan' => $loan, 'tab' => request('tab')]) }}" class="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-700">
@@ -91,7 +114,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-5 py-12 text-center text-gray-500">
+                                    <td colspan="6" class="px-5 py-12 text-center text-gray-500">
                                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                                         </svg>
