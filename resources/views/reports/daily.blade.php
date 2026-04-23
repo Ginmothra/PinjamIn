@@ -10,9 +10,13 @@
         
         .section-title { background: #f3f4f6; padding: 8px; font-weight: bold; margin-top: 20px; border-left: 4px solid #1a56db; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; word-wrap: break-word; }
         th { background-color: #f9fafb; font-weight: bold; font-size: 11px; text-transform: uppercase; }
+        
+        /* Optimasi untuk Halaman Panjang */
+        thead { display: table-header-group; } /* Ulangi header di tiap halaman */
+        tr { page-break-inside: avoid; } /* Jangan potong baris di tengah halaman */
         
         .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
         .badge-success { background: #dcfce7; color: #16a34a; }

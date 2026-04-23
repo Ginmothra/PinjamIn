@@ -16,10 +16,14 @@ class ReturnController extends Controller
      */
     public function getActiveLoans(Request $request): JsonResponse
     {
-        $loans = Loan::query()
-            ->with(['loanItems.item'])
+        // Ambil peminjaman yang berstatus membawa barang
+        $loans = Loan::with(['loanItems.item'])
             ->where('user_id', $request->user()->id)
-            ->where('status', 'borrowed')
+            ->whereIn('status', ['borrowed', 'booked', 'returned'])
+            ->whereDoesntHave('returns', function($q) {
+                // Jangan munculkan yang sudah ada record pengembalian 'pending' atau 'selesai'
+                $q->whereIn('status', ['partial', 'completed']);
+            })
             ->latest()
             ->get();
 
@@ -42,10 +46,13 @@ class ReturnController extends Controller
                     ->where('user_id', $request->user()->id)
                     ->firstOrFail();
 
-        // Pastikan belum pernah diajukan pengembalian sebelumnya
-        $exists = LoanReturn::where('loan_id', $loan->id)->exists();
+        // Pastikan belum ada pengembalian yang sedang PENDING atau sudah SELESAI
+        $exists = LoanReturn::where('loan_id', $loan->id)
+            ->whereIn('status', ['partial', 'completed'])
+            ->exists();
+
         if ($exists) {
-            return response()->json(['message' => 'Peminjaman ini sudah dalam proses pengembalian.'], 422);
+            return response()->json(['message' => 'Peminjaman ini sudah dalam proses pengembalian atau sudah selesai.'], 422);
         }
 
         try {
@@ -59,11 +66,15 @@ class ReturnController extends Controller
 
                 $return = LoanReturn::create([
                     'loan_id'     => $loan->id,
+                    'user_id'     => $request->user()->id, // Pastikan user_id tersimpan
                     'return_date' => now(),
                     'status'      => 'partial',
                     'proof_image' => $proofImagePath ? '/storage/' . $proofImagePath : null,
                     'notes'       => $request->notes,
                 ]);
+
+                // Update status peminjaman
+                $loan->update(['status' => 'returned']);
 
                 return response()->json([
                     'message' => 'Pengembalian berhasil diajukan! Bukti foto telah tersimpan.',
@@ -81,7 +92,7 @@ class ReturnController extends Controller
     public function index(Request $request): JsonResponse
     {
         $returns = LoanReturn::query()
-            ->with(['loan.loanItems.item', 'approver'])
+            ->with(['loan.loanItems.item']) // Hapus 'approver' karena tidak ada relasinya
             ->whereHas('loan', function($q) use ($request) {
                 $q->where('user_id', $request->user()->id);
             })

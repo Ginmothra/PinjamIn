@@ -64,7 +64,7 @@
                                             <p class="text-xs text-gray-500">{{ $return->loan->user->email }}</p>
                                         </div>
                                     </td>
-                                    <td class="px-5 py-4 text-gray-600">{{ $return->return_date->format('d M Y H:i') }}</td>
+                                    <td class="px-10 py-4 text-gray-600">{{ $return->return_date->format('d M Y') }}</td>
                                     <td class="px-5 py-4">
                                         <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset {{ $returnStatusBadges[$return->status] ?? 'bg-gray-100 text-gray-700 ring-gray-600' }}">
                                             {{ $returnStatusLabels[$return->status] ?? ucfirst($return->status) }}
@@ -83,12 +83,9 @@
                                                 </button>
                                             </form>
 
-                                            <form method="POST" action="{{ route('worker.returns.reject', $return) }}" onsubmit="return confirm('Tolak pengembalian ini?')">
-                                                @csrf
-                                                <button type="submit" class="inline-flex items-center rounded-md bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700">
-                                                    Tolak
-                                                </button>
-                                            </form>
+                                            <a href="{{ route('worker.returns.reject-form', $return) }}" class="inline-flex items-center rounded-md bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700">
+                                                Tolak
+                                            </a>
 
                                             <a href="{{ route('worker.returns.damaged', $return) }}" class="inline-flex items-center rounded-md bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600">
                                                 Rusak

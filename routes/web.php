@@ -106,6 +106,7 @@ Route::middleware(['auth', 'verified', 'role:worker'])->prefix('worker')->name('
     Route::get('/pengembalian', [WorkerReturnsController::class, 'index'])->name('returns.index');
     Route::get('/pengembalian/{loanReturn}', [WorkerReturnsController::class, 'show'])->name('returns.show');
     Route::post('/pengembalian/{loanReturn}/accept', [WorkerReturnsController::class, 'accept'])->name('returns.accept');
+    Route::get('/pengembalian/{loanReturn}/reject', [WorkerReturnsController::class, 'rejectForm'])->name('returns.reject-form');
     Route::post('/pengembalian/{loanReturn}/reject', [WorkerReturnsController::class, 'reject'])->name('returns.reject');
     Route::get('/pengembalian/{loanReturn}/damaged', [WorkerReturnsController::class, 'damagedForm'])->name('returns.damaged');
     Route::post('/pengembalian/{loanReturn}/damaged', [WorkerReturnsController::class, 'markDamaged'])->name('returns.mark-damaged');

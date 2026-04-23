@@ -102,12 +102,27 @@ class ReturnsController extends Controller
         }
     }
 
+    public function rejectForm(LoanReturn $loanReturn): View
+    {
+        if ($loanReturn->status !== 'partial') {
+            abort(404);
+        }
+
+        return view('worker.returns.reject', [
+            'loanReturn' => $loanReturn->load('loan.user', 'loan.loanItems.item'),
+        ]);
+    }
+
     public function reject(Request $request, LoanReturn $loanReturn): RedirectResponse
     {
         if ($loanReturn->status !== 'partial') {
             return redirect()->route('worker.returns.index')
                 ->with('status', 'Pengembalian ini sudah diproses sebelumnya.');
         }
+
+        $validated = $request->validate([
+            'notes' => ['required', 'string', 'max:1000'],
+        ]);
 
         DB::beginTransaction();
         try {
@@ -119,16 +134,17 @@ class ReturnsController extends Controller
                 'user_id' => (int) $request->user()->id,
                 'notes' => $this->appendSystemNote(
                     $loanReturn->notes,
-                    'Pengembalian ditolak oleh petugas pada ' . now()->format('d-m-Y H:i') . '.'
+                    'DITOLAK: ' . $validated['notes']
                 ),
             ]);
 
+            // Balikkan status loan ke borrowed agar user bisa upload ulang
             $loan->update(['status' => 'borrowed']);
             $loan->loanItems()->update(['returned_quantity' => 0]);
 
             DB::commit();
             return redirect()->route('worker.returns.index')
-                ->with('status', 'Pengembalian ditandai sebagai ditolak.');
+                ->with('status', 'Pengembalian berhasil ditolak dengan alasan.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal menolak pengembalian.');
@@ -155,6 +171,8 @@ class ReturnsController extends Controller
 
         $validated = $request->validate([
             'description' => ['required', 'string', 'max:1000'],
+            'damaged_items' => ['required', 'array', 'min:1'],
+            'damaged_items.*' => ['exists:items,id'],
         ]);
 
         DB::beginTransaction();
@@ -174,21 +192,23 @@ class ReturnsController extends Controller
             $loanReturn->update([
                 'notes' => $this->appendSystemNote(
                     $loanReturn->notes,
-                    'Pengembalian selesai dengan kondisi barang rusak: ' . $validated['description']
+                    'KONDISI RUSAK (' . count($validated['damaged_items']) . ' barang): ' . $validated['description']
                 ),
             ]);
 
-            // Update condition barang jadi damaged & buat repair record
+            // Update condition barang jadi damaged & buat repair record HANYA untuk yang dipilih
             foreach ($loan->loanItems as $loanItem) {
-                $item = $loanItem->item;
-                $item->update(['condition' => 'damaged']);
+                if (in_array($loanItem->item_id, $validated['damaged_items'])) {
+                    $item = $loanItem->item;
+                    $item->update(['condition' => 'damaged']);
 
-                \App\Models\Repair::create([
-                    'item_id' => $item->id,
-                    'loan_return_id' => $loanReturn->id,
-                    'description' => $validated['description'],
-                    'status' => 'pending',
-                ]);
+                    \App\Models\Repair::create([
+                        'item_id' => $item->id,
+                        'loan_return_id' => $loanReturn->id,
+                        'description' => $validated['description'],
+                        'status' => 'pending',
+                    ]);
+                }
             }
 
             DB::commit();
@@ -196,7 +216,7 @@ class ReturnsController extends Controller
                 ->with('status', 'Laporan kerusakan berhasil dikirim ke Teknisi.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal memproses kerusakan barang.');
+            return redirect()->back()->with('error', 'Gagal memproses kerusakan barang: ' . $e->getMessage());
         }
     }
 

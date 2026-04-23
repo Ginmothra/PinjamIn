@@ -15,30 +15,35 @@
             </div>
 
             @if($loanReturn->status === 'partial')
-                <div class="mb-6 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
-                    <div class="flex flex-wrap gap-2">
-                        <form method="POST" action="{{ route('worker.returns.accept', $loanReturn) }}" onsubmit="return confirm('Terima pengembalian ini?')">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
-                                Terima
-                            </button>
-                        </form>
-
-                        <form method="POST" action="{{ route('worker.returns.reject', $loanReturn) }}" onsubmit="return confirm('Tolak pengembalian ini?')">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700">
-                                Tolak
-                            </button>
-                        </form>
-
-                        <form method="POST" action="{{ route('worker.returns.damaged', $loanReturn) }}">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600">
-                                Rusak
-                            </button>
-                        </form>
+                <div class="mb-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 border-l-4 border-amber-500">
+                    <div class="flex items-center justify-between mb-3 px-2">
+                        <span class="text-sm font-bold text-slate-700 uppercase tracking-wider">Aksi Validasi</span>
                     </div>
-                    <p class="mt-2 text-xs text-slate-500">Aksi Rusak saat ini masih placeholder dan akan diproses di modul Technician.</p>
+                    <div class="flex flex-wrap gap-3">
+                        <form method="POST" action="{{ route('worker.returns.accept', $loanReturn) }}" onsubmit="return confirm('Terima pengembalian ini? Stok barang akan otomatis bertambah.')">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center rounded-md bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Terima & Selesai
+                            </button>
+                        </form>
+
+                        <a href="{{ route('worker.returns.reject-form', $loanReturn) }}" class="inline-flex items-center rounded-md bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-700 transition">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Tolak (Minta Foto Ulang)
+                        </a>
+
+                        <a href="{{ route('worker.returns.damaged', $loanReturn) }}" class="inline-flex items-center rounded-md bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-600 transition">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            Ada Barang Rusak
+                        </a>
+                    </div>
                 </div>
             @endif
 
@@ -119,8 +124,13 @@
                     @if($loanReturn->proof_image)
                         <div class="mt-6 border-t border-gray-200 pt-6">
                             <h3 class="text-lg font-semibold text-gray-900 mb-3">Foto Bukti Pengembalian</h3>
-                            <div class="max-w-md overflow-hidden rounded-xl border border-slate-200">
-                                <img src="{{ $loanReturn->proof_image }}" alt="Bukti Foto" class="h-auto w-full object-contain">
+                            <div class="max-w-md overflow-hidden rounded-xl border border-slate-200 group relative">
+                                <a href="{{ $loanReturn->proof_image }}" target="_blank" title="Klik untuk memperbesar">
+                                    <img src="{{ $loanReturn->proof_image }}" alt="Bukti Foto" class="h-auto w-full object-contain transition group-hover:opacity-90">
+                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20 text-white font-bold text-sm">
+                                        Klik untuk Zoom
+                                    </div>
+                                </a>
                             </div>
                         </div>
                     @endif
