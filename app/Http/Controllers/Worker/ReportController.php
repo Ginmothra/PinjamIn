@@ -32,11 +32,9 @@ class ReportController extends Controller
             ->whereBetween('return_date', [$start, $end])
             ->get();
 
-        // 3. Data Kerusakan (Berdasarkan status di returns atau manual log)
-        // Kita ambil dari returns yang statusnya 'rejected' (bermasalah/rusak)
-        $damaged = LoanReturn::with(['loan.user', 'loan.loanItems.item'])
-            ->whereBetween('return_date', [$start, $end])
-            ->where('status', 'rejected')
+        // 3. Data Kerusakan (Berdasarkan histori perbaikan teknisi)
+        $damaged = \App\Models\Repair::with(['item', 'loanReturn.loan.user'])
+            ->whereBetween('created_at', [$start, $end])
             ->get();
 
         $data = [

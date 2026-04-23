@@ -125,14 +125,10 @@
             <tbody>
                 @foreach($damaged as $dmg)
                     <tr>
-                        <td>
-                            @foreach($dmg->loan->loanItems as $li)
-                                {{ $li->item->name }}<br>
-                            @endforeach
-                        </td>
-                        <td>{{ $dmg->loan->user->name }}</td>
-                        <td>{{ $dmg->return_date->format('d/m/Y') }}</td>
-                        <td>{{ $dmg->notes ?? 'Terdeteksi kerusakan saat pengembalian' }}</td>
+                        <td>{{ $dmg->item->name }}</td>
+                        <td>{{ $dmg->loanReturn->loan->user->name ?? 'Manual Log' }}</td>
+                        <td>{{ $dmg->created_at->format('d/m/Y') }}</td>
+                        <td>{{ $dmg->description }}</td>
                     </tr>
                 @endforeach
             </tbody>
