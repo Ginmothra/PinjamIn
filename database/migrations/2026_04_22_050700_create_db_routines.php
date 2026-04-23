@@ -55,7 +55,7 @@ return new class extends Migration
             BEGIN
                 -- Update Loan & Return Status
                 UPDATE loans SET status = 'completed' WHERE id = l_id;
-                UPDATE loan_returns SET status = 'completed', user_id = w_id WHERE id = r_id;
+                UPDATE returns SET status = 'completed', user_id = w_id WHERE id = r_id;
 
                 -- Update Item Stock (Increase back)
                 UPDATE items i
