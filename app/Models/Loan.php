@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['loan_code', 'user_id', 'loan_date', 'due_date', 'status', 'approved_by', 'approved_at', 'notes', 'reject_reason', 'rejected_by', 'rejected_at'])]
+#[Fillable(['loan_code', 'user_id', 'loan_date', 'due_date', 'status', 'approved_by', 'approved_at', 'notes', 'reject_reason', 'rejected_by', 'rejected_at', 'verification_code'])]
 class Loan extends Model
 {
     use HasFactory;
